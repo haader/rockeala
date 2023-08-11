@@ -1,70 +1,81 @@
 import React, { useEffect, useState } from "react";
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import bannerImage from '../assets/banner.png';
-import iconImage from '../assets/icon.png';
+import bannerImage from '../../assets/banner.png';
+import iconImage from '../../assets/icon.png';
 import TurnosDayModal from "./TurnosDayModal";
 
 export default function ScreenTurnos() {
-  const [anio, setAnio] = useState();
-  const [mes, setMes] = useState();
-  const [dia, setDia] = useState();
-  const [dirImg,setDirImg]=useState(iconImage);
-  const nameMeses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','noviembre','diciembre'];
-  const [closeModal,setCloseModal]=useState(false);
-  const [estadoVisible,setEstadoVisible]=useState(false);
-
+  const [thisAnio, setThisAnio] = useState();
+  const [thisMes, setThisMes] = useState();
+  const [thisDia, setThisDia] = useState();
   //variables para la selección del modal
-  const[diaSelect,setDiaSelect]=useState();
-  const[mesSelect,setMesSelect]=useState();
-  const[anioSelect,setAnioSelect]=useState();
+  const[selectDia,setSelectDia]=useState();
+  const[selectMes,setSelectMes]=useState();
+  const[selectAnio,setSelectAnio]=useState();
+
+  // const [dirImg,setDirImg]=useState(iconImage);
+  const nameMeses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','noviembre','diciembre'];
+  // const [closeModal,setCloseModal]=useState(false);
+  const [estadoVisible,setEstadoVisible]=useState(false);
+  //colocamos una nueva variable para limitar el add de turnos a dias que ya pasaron
+  const[addTurno,setAddTurno]=useState(false);
+
+  
 
 
   useEffect(() => {
+    //obtenemos los dias mes y anio actuales y guardamos las variables
     const currentDate = new Date();
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
     const day = currentDate.getDate();
-    
 
-    setAnio(year);
-    setMes(month);
-    setDia(day);
+    setThisAnio(year);
+    setThisMes(month);
+    setThisDia(day);
 
-    console.log(`${dia}/${mes}/${anio}`);
+    setSelectAnio(year);
+    setSelectMes(month);
+
+    console.log(`${thisDia}/${thisMes}/${thisAnio}`);
   }, []);
 
   //función para ver el Modal con los turnos
   const ChangeEstadoVisible=()=>{
     setEstadoVisible(false);
   }
-
-   
-  const RenderizarSemana = ({ year, month, thisday }) => {
-    const firstDay = new Date(year, month - 1, 1);
-    const lastDay = new Date(year, month, 0);
+  
+  const RenderizarSemana = ({ thisMonth, thisDay }) => {
+    const firstDay = new Date(selectAnio, selectMes - 1, 1);
+    const lastDay = new Date(selectAnio, selectMes, 0);
     const daysInMonth = lastDay.getDate();
-    console.log("Día actual: " + thisday);
+    console.log("Día actual: " + thisDay);
 
     let calendar = [];
     let semana=[];
     let count=0;
 
-    // Agregar espacios en blanco antes del primer día del mes
+    // Agregar espacios en blanco antes del primer día del thisMes
     for (let i = 0; i < firstDay.getDay(); i++) {
       count++;
       semana.push(
-          <View key={`empty-${i}`} style={{width:"14%",height:50,alignContent:'center'}}>
-              <Text  style={styles.day}>{' '}</Text>
+          <View key={`empty-${i}`} style={{width:"14%",height:51,}}>
+              <Text  style={styles.day}>{'  '}</Text>
           </View>
       );
     }
 
-    // Imprimir los días del mes
+    // Imprimir los días del thisMes
     for (let day = 1; day <= daysInMonth; day++) {
       
-      const isCurrentDay = thisday === day;
-      const dayStyle = isCurrentDay ? [styles.day, styles.currentDay] : styles.day;
+      //si el dia actual es igual al que se renderiza cambia de color
+      //si los dias ya pasaron cambia de color
+      
+      const isCurrentDay = thisDay === day && thisMonth === selectMes;
+      const dayStyle = isCurrentDay ? [styles.day, styles.currentDay] :  day<thisDay && thisMonth === selectMes ?styles.passDay:styles.day;
+      
+      
       if(count==7||count==14||count==21||count==28||count==35||count==42){
         calendar.push(
           <View key={`semana${day}`} style={{width:'100%',display:'flex',flexDirection:'row'}}>
@@ -74,14 +85,22 @@ export default function ScreenTurnos() {
         semana=[];
       }
       count++;
-
+  
+      //pusheamos las semanas
       semana.push(
         <TouchableOpacity key={`day-${day}`} style={{width:"14%",height:50,borderWidth:1}}
         onPress={()=>{
-          setDiaSelect(day);
-          setMesSelect(month);
-          setAnioSelect(year);
-          setEstadoVisible(true)
+          setSelectDia(day);
+          setSelectMes(selectMes);
+          setSelectAnio(selectAnio);
+          setEstadoVisible(true);
+          
+                if(thisMonth === selectMes){
+                day < thisDay ? setAddTurno(false):setAddTurno(true);
+                }else{
+                  setAddTurno(true);
+                }
+                
           }}>
             <Text  style={dayStyle}>
               {day}
@@ -102,68 +121,82 @@ export default function ScreenTurnos() {
     return <View style={styles.week}>{calendar}</View>;
   };
 
-  const toggleImage = () => {
-    if (dirImg === bannerImage) {
-      setDirImg(iconImage);
-    } else {
-      setDirImg(bannerImage);
-    }
-  };
+  // const toggleImage = () => {
+  //   if (dirImg === bannerImage) {
+  //     setDirImg(iconImage);
+  //   } else {
+  //     setDirImg(bannerImage);
+  //   }
+  // };
 
   const next=()=>{
-    setMes(mes+1);
+    setSelectMes(selectMes+1);
   }
   const prev=()=>{
-    setMes(mes-1);
+    setSelectMes(selectMes-1);
     
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ flex: 1, alignItems: 'center',height:'100%' }}>
       
-      <TurnosDayModal nameDay={nameMeses[mes-1]} numberDay={diaSelect} month={mesSelect} year={anioSelect} estadoVisible={estadoVisible} cerrarModal={ChangeEstadoVisible}/>
+      <TurnosDayModal 
+      nameDay={nameMeses[thisMes-1]} 
+      numberDay={selectDia} 
+      month={selectMes} 
+      year={selectAnio} 
+      estadoVisible={estadoVisible} 
+      cerrarModal={ChangeEstadoVisible}
+      addTurno={addTurno}
+      />
       
-      <TouchableOpacity onPress={toggleImage} style={{height:'20%',width:'100%',position:'absolute',top:0}}>
+      {/* <TouchableOpacity onPress={toggleImage} style={{height:'20%',width:'100%',position:'absolute',top:0}}>
           <ImageBackground source={dirImg} style={styles.img}>
-            {/* Aquí colocarás el resto de los componentes de tu aplicación */}
+            
           </ImageBackground>
-      </TouchableOpacity>
-
-      <View style={styles.calendarioHead}>
-        <TouchableOpacity onPress={prev}>
-          <MaterialIcons name="navigate-before" size={50} color="black" />
-        </TouchableOpacity>
-        
-        <View style={[styles.column,{alignItems:'center',width:'60%'}]}>
-              
-                  <Text style={{fontSize:30}}>{nameMeses[mes-1]}</Text>
-              
-              <View style={[styles.row,{alignItems:'center',width:'30%'}]}>
-                  <Text>{dia}/</Text>
-                  <Text>{mes}/</Text>
-                  <Text>{anio}</Text>
-              </View>
+      </TouchableOpacity> */}
+        <View style={styles.header}>
+          <Text>Turnos</Text>
         </View>
 
-        <TouchableOpacity onPress={next}>
-            <MaterialIcons name="navigate-next" size={50} color="black" />
-        </TouchableOpacity>
-      
+      <View style={styles.calendarioHead}>
+            <View style={[styles.row,{justifyContent:'center'}]}>
+                          <TouchableOpacity onPress={prev}>
+                        <MaterialIcons name="navigate-before" size={50} color="white" />
+                      </TouchableOpacity>
+                      
+                      <View style={[styles.column,{alignItems:'center',width:'60%'}]}>
+                            
+                                <Text style={styles.thisMes}>{nameMeses[selectMes-1]}</Text>
+                            
+                            <View style={[styles.row,{alignItems:'center',width:'30%'}]}>
+                                <Text style={styles.fecha}>{thisDia}/</Text>
+                                <Text style={styles.fecha}>{selectMes}/</Text>
+                                <Text style={styles.fecha}>{thisAnio}</Text>
+                            </View>
+                      </View>
+
+                      <TouchableOpacity onPress={next}>
+                          <MaterialIcons name="navigate-next" size={50} color="white" />
+                      </TouchableOpacity>
+                    
+            </View>
+            <View style={[styles.row,styles.diasSemana,{width:'100%',justifyContent:'center'}]}>
+              
+              <Text style={styles.nameDay}>Do</Text>
+              <Text style={styles.nameDay}>Lu</Text>
+              <Text style={styles.nameDay}>Ma</Text>
+              <Text style={styles.nameDay}>Mi</Text>
+              <Text style={styles.nameDay}>Ju</Text>
+              <Text style={styles.nameDay}>Vi</Text>
+              <Text style={styles.nameDay}>Sa</Text>
+              
+            </View>
       </View>
       
-      <View style={[styles.row,{width:'100%',justifyContent:'center'}]}>
-        
-        <Text style={styles.nameDay}>Do</Text>
-        <Text style={styles.nameDay}>Lu</Text>
-        <Text style={styles.nameDay}>Ma</Text>
-        <Text style={styles.nameDay}>Mi</Text>
-        <Text style={styles.nameDay}>Ju</Text>
-        <Text style={styles.nameDay}>Vi</Text>
-        <Text style={styles.nameDay}>Sa</Text>
-        
-      </View>
+      
       {/* <View style={[styles.column]}> */}
-        <RenderizarSemana year={anio} month={mes} thisday={dia} />
+      <RenderizarSemana thisMonth={thisMes} thisDay={thisDia}/>
       {/* </View> */}
       
     </View>
@@ -171,15 +204,30 @@ export default function ScreenTurnos() {
 }
 
 const styles = StyleSheet.create({
-  calendarioHead: {
+  header: {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    margin:10,
+    alignItems: 'center',
+    padding:10,
+    width:'97%'
+  },calendarioHead: {
+    display: 'flex',
+    flexDirection: 'column',
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius:10,
     borderWidth:1,
-    backgroundColor:'orange'
+    backgroundColor:'black'
+  },thisMes:{
+    fontSize:30,
+    color:'white'
+  },fecha:{
+    color:'white'
   },
   row: {
     display: 'flex',
@@ -197,20 +245,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     marginBottom: 10
   },
+  diasSemana:{
+    borderWidth:1,
+    borderBottomRightRadius:10,
+    borderBottomLeftRadius:10,
+    backgroundColor:'black'
+  },
   nameDay:{
     width:"14%",
     height:50,
     borderWidth:1,
     textAlign:'center',
-    textAlignVertical:'center'
+    textAlignVertical:'center',
+    color:'white'
   },
   day: {
     flex: 1,
-    textAlign: 'center',
-    fontSize:20
+    fontSize:17,
+    
+  },passDay:{
+    color:'gray',
+    fontSize:17,
+    borderColor:'gray'
   },
   currentDay: {
-    backgroundColor: 'red'
+    backgroundColor: 'black',
+    color:'white',
+    fontSize:20,
+    color:'red',
+    alignItems:'center',
+    justifyContent:'center'
   },
   img:{
     width:'100%',

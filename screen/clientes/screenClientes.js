@@ -1,41 +1,91 @@
 import React, { useEffect, useState } from "react";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, ScrollView, Button, View, Modal, FlatList, TextInput } from 'react-native'; // Importamos FlatList y TextInput
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, ScrollView, Button, View, FlatList, TextInput,Alert } from 'react-native'; // Importamos FlatList y TextInput
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import FichaClienteModal from "./FichaClienteModal";
 
+import { fetchClientes, addClientes } from "../../database/databaseClientes";
+
+
 export default ScreenClientes = () => {
+
+  const objetoDatos=[
+  {
+  "adress":"No informado",
+  "phone":"No informado",
+  "estilista":"Natalia Soledad Romero"
+  }];
+  const objetoHistorial=[
+    {
+    
+  }
+  ];
+  const objetoDetalle=[{
+    "longitud":"No informado",
+    "textura":"No informado",
+    "porosidad":"No informado",
+    "colorNatural":"No informado",
+    "colorDeseado":"No informado",
+    "nivelRequerido":"No informado",
+    "canas": "No informado",
+    "procedimientos": "No informado",
+    "altura": "No informado",
+    "volumenesUtilizados": "No informado",
+    "formulaTinte": "No informado",
+    "centimetrosCrecimiento": "No informado",
+    "nivelMedios": "No informado",
+    "nivelPuntas": "No informado",
+    "deseoCliente": "No informado",
+    "formulaDecolorante": "No informado",
+    "tecnicasUtilizadas": "No informado",
+    "tratamientos": "No informado",
+    }]
+
   const [valorInput, setValorInput] = useState(""); // Estado para almacenar el valor del input de búsqueda
   const [filteredClientes, setFilteredClientes] = useState([]); // Estado para almacenar los clientes filtrados
-  const nameClientes=["mario","natalia","matias","rodrigo","ambar"];
+  const [listaClientes,setListaClientes]=useState();
+
+  const traerDatos=()=>{
+    fetchClientes((data)=>{
+      setListaClientes(data);
+      console.log(data)
+    })
+  }
+
+  useEffect(()=>{
+      traerDatos()  
+  },[])
   
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState();
-  
+  const [SelectedClienteID,setSelectedClienteID]=useState();
   
   useEffect(() => {
     // Lógica para filtrar los clientes según lo que se escriba en el input
-    const filteredResults = nameClientes.filter((cliente) =>
-      cliente.toLowerCase().includes(valorInput.toLowerCase())
+    if(listaClientes!=undefined){
+      const filteredResults = listaClientes.filter((cliente) =>
+      cliente.nombreCliente.toLowerCase().includes(valorInput.toLowerCase())
     );
     setFilteredClientes(filteredResults);
-  }, [valorInput]);
+    }
+  }, [valorInput,listaClientes]);
 
  
   // Función para renderizar cada elemento de la lista
   const renderItem = ({ item }) => (
 
     <View style={{width:'100%',padding:5}}>
-        <TouchableOpacity style={{borderRadius:10,borderWidth:1,padding:5}} onPress={
+        <TouchableOpacity style={{borderRadius:10,borderWidth:1,padding:10,marginLeft:5,marginRight:5}} onPress={
             () => {
-              setSelectedCliente(item);
+              setSelectedCliente(item.nombreCliente);
+              setSelectedClienteID(item.id);
               setModalIsVisible(true)
                 console.log("Seleccionado:", item)
             }
             
             }>
-      <Text>{item}</Text>
+      <Text>{item.nombreCliente}</Text>
     </TouchableOpacity>
     </View>
   );
@@ -45,7 +95,7 @@ export default ScreenClientes = () => {
         <FlatList
           data={filteredClientes}
           renderItem={renderItem}
-          keyExtractor={(item) => item} // Puedes cambiar esto si tienes un identificador único para cada cliente
+          keyExtractor={(item) => item.id} // Puedes cambiar esto si tienes un identificador único para cada cliente
         />
     )
   }
@@ -57,11 +107,39 @@ export default ScreenClientes = () => {
   const BotonAgregar=()=>{
     return(
         <View style={{alignItems:'center'}}>
-                <TouchableOpacity style={styles.btn} onPress={()=>{console.log("se agregara el siguiente cliente: "+valorInput)}}>
+                <TouchableOpacity style={styles.btn} onPress={()=>{
+                          addNewCliente();
+                    }}>
                     <Text>Agregar Nuevo Cliente</Text>
                </TouchableOpacity>
         </View>
     )    
+  }
+
+  const addNewCliente=()=>{
+    
+    if(valorInput!=(null||''||undefined)){
+          Alert.alert(
+            'Agregar Cliente',`Desea Agregar a ${valorInput} a la base de datos de Clientes`,
+          [{
+            text:'Si',
+            onPress:()=>{
+              addClientes(valorInput,objetoDatos,objetoHistorial,objetoDetalle);
+              traerDatos();
+            },
+            style:'default'
+          },
+          {
+            text:'No',
+            onPress:()=>{},
+            style:'default'
+          }
+        ]
+        );
+    }else{
+      Alert.alert('Atención','Debe agregar un nombre para el Cliente',[{text:'Aceptar',onPress:()=>{},style:'default'}])
+    }
+    
   }
 
   return (
@@ -69,7 +147,7 @@ export default ScreenClientes = () => {
       <View style={{ height: '100%' }}>
         
             <View style={styles.header}>
-                    <Text>Ficha de clientes</Text>
+                    <Text>Clientes</Text>
             </View>
             <View style={styles.body}>
 
@@ -83,7 +161,7 @@ export default ScreenClientes = () => {
                         />
                                         
                         <TouchableOpacity style={{width:'20%'}} onPress={()=>{
-                            setValorInput("")
+                            setValorInput('')
                         }}>
                             <AntDesign name="closecircle" size={24} color="black" />
                         </TouchableOpacity>
@@ -95,7 +173,7 @@ export default ScreenClientes = () => {
             </View>
             
            
-      <FichaClienteModal nameSelected={selectedCliente} visible={modalIsVisible} closeModal={funsionCerrar}/>
+      <FichaClienteModal idCliente={SelectedClienteID} nameCliente={selectedCliente} visible={modalIsVisible} closeModal={funsionCerrar}/>
 
       </View>
       
@@ -112,7 +190,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin:10,
     alignItems: 'center',
-    padding:10
+    padding:10,
+    width:'97%'
   },row: {
     display: 'flex',
     flexDirection: 'row',

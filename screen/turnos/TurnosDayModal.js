@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import AgregarTurnoModal from "./AgregarTurnoModal";
 
-export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible})=>{
+export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible, addTurno})=>{
 
     const[visibleModalAddTurno,setVisibleModalAddTurno]=useState(false)
     const[timeSelect,setTimeSelect]=useState("")
@@ -89,13 +89,21 @@ const BtnAcciones=()=>{
     )
 }
 
-const BtnAgregar=({time})=>{
+const BtnAgregar=({time, addTurno})=>{
     return(
-        <TouchableOpacity style={styles.btn} onPress={()=>agregarTurno(time)}>
+        <TouchableOpacity style={styles.btn} onPress={()=>{
+            if(addTurno){
+                agregarTurno(time)
+            }
+        }
+        
+            
+        
+        }>
                 
                 {/* Agregar */}
                 
-                    <AntDesign name="pluscircleo" size={24} color="black" />
+                    <AntDesign name="pluscircleo" size={24} color={addTurno?"black":'gray'} />
                 
                 
         </TouchableOpacity>
@@ -119,7 +127,7 @@ const Horarios=()=>{
             <View style={styles.body}>
                 <Text>{datos[hora-8].nombreCliente}</Text>
             </View>
-            {datos[hora - 8].nombreCliente!='Horario Disponible' ? <BtnAcciones /> : <BtnAgregar time={datos[hora - 8].hora}/>}
+            {datos[hora - 8].nombreCliente!='Horario Disponible' ? <BtnAcciones /> : <BtnAgregar addTurno={addTurno} time={datos[hora - 8].hora}/>}
         </View>
 
         )
