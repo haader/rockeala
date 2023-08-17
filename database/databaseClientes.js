@@ -33,49 +33,109 @@ export const addClientes=(nombreCliente,objetoDatos,objetoHistorial,objetoDetall
     })
   }
 
-  export const deleteClientes=(id)=>{
+  export const deleteClientes=(id,name)=>{
 
-    database.transaction((tx)=>{
-      tx.executeSql('DELETE FROM clientes WHERE id = ?', [id]);
-    })
-  }
-
-  export const updateClientes = (id,nombreCliente,objetoDatos,objetoHistorial,objetoDetalle) => {
-
-    database.transaction((tx) => {
-      tx.executeSql(
-        'UPDATE clientes SET fecha = ?, descripcion = ?, valor = ? WHERE id = ?',
-        [fecha,descripcion,valor, id],
+    Alert.alert("ATENCION",`desea eliminar de la base de datos a ${name}`,[{text:'Si',onPress:()=>{
+      database.transaction((tx)=>{
+        tx.executeSql('DELETE FROM clientes WHERE id = ?', [id],
+        
         (txObj, resultSet) => {
           if (resultSet.rowsAffected > 0) {
            Alert.alert(
-              'Atención',
-              'Se actualizaron los datos',
+              'Atención: OPERACIÓN REALIZADA',
+              `Se Elimino a ${name}`,
               [{
                   text:'OK',
                   onPress:()=>{},
                   style:'default'
               }]
            ); 
-           console.log("Se actualizaron los datos en la tabla CLIENTES para el ID: ", id);
+           
           } else {
-              Alert.alert('Atencion','No se actualizaron los datos',[{text:'Ok',onPress:()=>{},style:'default'}])
+              Alert.alert('Atencion:ERROR',`No se pudo Eliminar a ${name}`,[{text:'Ok',onPress:()=>{},style:'default'}])
             console.log("No se encontró ninguna fila con el ID proporcionado.",id);
           }
         },
         (error) => {
           console.log("Error al actualizar los datos en la tabla CLIENTES: ", error);
         }
-      );
-    });
+
+
+        
+        
+        
+        );
+      })
+    }},{text:'No',onPress:()=>{}}])
+    
+  }
+
+  export const updateClientes = (id,nombreCliente,objetoDatos,objetoHistorial,objetoDetalle) => {
+
+    Alert.alert("Atencion","desea guardar los cambios?",
+    [
+    {
+        text:'Si',
+        onPress:()=>{
+            
+          database.transaction((tx) => {
+            tx.executeSql(
+              //nombreCliente TEXT, objetoDatos TEXT, objetoHistorial TEXT, objetoDetalle TEXT
+              'UPDATE clientes SET nombreCliente = ?, objetoDatos = ?, objetoHistorial = ?, objetoDetalle = ? WHERE id = ?',
+              [nombreCliente,objetoDatos,objetoHistorial,objetoDetalle, id],
+              (txObj, resultSet) => {
+                if (resultSet.rowsAffected > 0) {
+                 Alert.alert(
+                    'Atención',
+                    'Se actualizaron los datos',
+                    [{
+                        text:'OK',
+                        onPress:()=>{},
+                        style:'default'
+                    }]
+                 ); 
+                 console.log("Se actualizaron los datos en la tabla CLIENTES para el ID: ", id);
+                } else {
+                    Alert.alert('Atencion','No se actualizaron los datos',[{text:'Ok',onPress:()=>{},style:'default'}])
+                  console.log("No se encontró ninguna fila con el ID proporcionado.",id);
+                }
+              },
+              (error) => {
+                console.log("Error al actualizar los datos en la tabla CLIENTES: ", error);
+              }
+            );
+          });
+          
+          
+        }
+
+    },
+    {
+        text:'No',
+        onPress:()=>{}
+    }
+    ])
+
+
 
     
-
 
   };
   
 //(id INTEGER PRIMARY KEY AUTOINCREMENT, nombreCliente TEXT, objetoDatos TEXT, objetoHistorial TEXT, objetoDetalle TEXT)' 
 //traemos los datos de la tabla precios
+  export const fetchDatosCliente = (id,callback) => {
+    database.transaction((tx) => {
+      tx.executeSql('SELECT nombreCliente,objetoDatos,objetoHistorial,objetoDetalle FROM clientes WHERE id = ?', [id], (_, { rows }) => {
+        callback(rows._array);
+        
+      }
+      , (tx, error) => {
+        console.error("Error en la consulta SQL:", error);
+      });
+    });
+  };
+
   export const fetchClientes = (callback) => {
     database.transaction((tx) => {
       tx.executeSql('SELECT id,nombreCliente FROM clientes', [], (_, { rows }) => {

@@ -4,14 +4,29 @@ import { AntDesign } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import AgregarTurnoModal from "./AgregarTurnoModal";
+import { fetchClientes } from "../../database/databaseClientes";
+import { fetchTurnos } from "../../database/init/initDatabase";
 
 export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible, addTurno})=>{
 
-    const[visibleModalAddTurno,setVisibleModalAddTurno]=useState(false)
-    const[timeSelect,setTimeSelect]=useState("")
-    const nameClientes=["mario","natalia","matias","rodrigo","ambar"];
+    const [visibleModalAddTurno,setVisibleModalAddTurno]=useState(false)
+    const [timeSelect,setTimeSelect]=useState("")
+    const [nameClientes,setNameClientes]=useState();
+    
+    //traemos los nombres de los usuarios
+    useEffect(()=>{
+        
+        fetchClientes(data=>{
+            setNameClientes(data)
+        })
+        console.log("trayendo nombre de clientes")
 
-const nameDay=(numberDay,month,year)=>{
+        fetchTurnos(`${month}${year}`,numberDay,(datos)=>{setDatos(datos)})
+
+    },[numberDay])
+
+
+    const nameDay=(numberDay,month,year)=>{
 
     //definimos la lista de clientes
     
@@ -33,23 +48,25 @@ const nameDay=(numberDay,month,year)=>{
 
 }
 
+//'CREATE TABLE IF NOT EXISTS ? (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+//dia TEXT, cliente TEXT, hora TEXT
     const [datos, setDatos] = useState([
-        { "nombreCliente": 'Horario Disponible', "hora": '08' },
-        { "nombreCliente": 'Horario Disponible', "hora": '09' },
-        { "nombreCliente": 'Horario Disponible', "hora": '10' },
-        { "nombreCliente": 'Horario Disponible', "hora": '11' },
-        { "nombreCliente": 'ramon', "hora": '12' },
-        { "nombreCliente": 'Horario Disponible', "hora": '13' },
-        { "nombreCliente": 'Horario Disponible', "hora": '14' },
-        { "nombreCliente": 'Horario Disponible', "hora": '15' },
-        { "nombreCliente": 'Horario Disponible', "hora": '16' },
-        { "nombreCliente": 'Horario Disponible', "hora": '17' },
-        { "nombreCliente": 'Horario Disponible', "hora": '18' },
-        { "nombreCliente": 'Horario Disponible', "hora": '19' },
-        { "nombreCliente": 'Horario Disponible', "hora": '20' },
-        { "nombreCliente": 'Horario Disponible', "hora": '21' },
-        { "nombreCliente": 'Horario Disponible', "hora": '22' },
-        { "nombreCliente": 'Horario Disponible', "hora": '23' },
+        { "cliente": 'Horario Disponible', "hora": '08' },
+        { "cliente": 'Horario Disponible', "hora": '09' },
+        { "cliente": 'Horario Disponible', "hora": '10' },
+        { "cliente": 'Horario Disponible', "hora": '11' },
+        { "cliente": 'Horario Disponible', "hora": '12' },
+        { "cliente": 'Horario Disponible', "hora": '13' },
+        { "cliente": 'Horario Disponible', "hora": '14' },
+        { "cliente": 'Horario Disponible', "hora": '15' },
+        { "cliente": 'Horario Disponible', "hora": '16' },
+        { "cliente": 'Horario Disponible', "hora": '17' },
+        { "cliente": 'Horario Disponible', "hora": '18' },
+        { "cliente": 'Horario Disponible', "hora": '19' },
+        { "cliente": 'Horario Disponible', "hora": '20' },
+        { "cliente": 'Horario Disponible', "hora": '21' },
+        { "cliente": 'Horario Disponible', "hora": '22' },
+        { "cliente": 'Horario Disponible', "hora": '23' },
         
       ]);
       
@@ -119,15 +136,17 @@ const Horarios=()=>{
         horarios.push(
 
         <View style={styles.ficha} key={`hora${hora}`}>
-            <View style={[styles.hora,datos[hora-8].nombreCliente!='Horario Disponible'?styles.horaWhite:styles.horaBlack]}>
-                {datos[hora-8].nombreCliente=='Horario Disponible'?<MaterialCommunityIcons name="circle-outline" size={24} color="white" />:<MaterialIcons name="check-circle-outline" size={24} color="green" />}
-                <Text style={datos[hora-8].nombreCliente=='Horario Disponible'?styles.textWhite:styles.textBlack}>{datos[hora-8].hora}:00 hs</Text>
+            {/* si esta vacio */}
+            <View style={[styles.hora,datos[hora-8].cliente!=undefined?styles.horaWhite:styles.horaBlack]}>
+                {/* si NO esta vacio, es decir "Horario Disponible"*/}
+                {datos[hora-8].cliente=='Horario Disponible'?<MaterialCommunityIcons name="circle-outline" size={24} color="white" />:<MaterialIcons name="check-circle-outline" size={24} color="green" />}
+                <Text style={datos[hora-8].cliente=='Horario Disponible'?styles.textWhite:styles.textBlack}>{datos[hora-8].hora}:00 hs</Text>
             </View>
             
             <View style={styles.body}>
-                <Text>{datos[hora-8].nombreCliente}</Text>
+                <Text>{datos[hora-8].cliente}</Text>
             </View>
-            {datos[hora - 8].nombreCliente!='Horario Disponible' ? <BtnAcciones /> : <BtnAgregar addTurno={addTurno} time={datos[hora - 8].hora}/>}
+            {datos[hora - 8].cliente!='Horario Disponible' ? <BtnAcciones /> : <BtnAgregar addTurno={addTurno} time={datos[hora - 8].hora}/>}
         </View>
 
         )
@@ -179,7 +198,7 @@ const closeModal=()=>{
                 <AntDesign name="closecircleo" size={50} color="black" />
             </TouchableOpacity>
             
-            <AgregarTurnoModal nameDay={nameDay(numberDay,month,year)} numberDay={numberDay} month={month} visible={visibleModalAddTurno} cerrarModal={closeModal} time={timeSelect} clientes={nameClientes}/>
+            <AgregarTurnoModal anio={year} nameDay={nameDay(numberDay,month,year)} numberDay={numberDay} month={month} visible={visibleModalAddTurno} cerrarModal={closeModal} time={timeSelect} clientes={nameClientes}/>
 
 
         </Modal>

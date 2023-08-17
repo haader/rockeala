@@ -3,8 +3,9 @@ import { ImageBackground, StyleSheet, Text, TouchableOpacity, ScrollView, Button
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import { addTurnos } from "../../database/init/initDatabase";
 
-export default AgregarTurnoModal = ({ nameDay, numberDay, month, cerrarModal, visible, time, clientes }) => {
+export default AgregarTurnoModal = ({anio,nameDay, numberDay, month, cerrarModal, visible, time, clientes }) => {
   const [valorInput, setValorInput] = useState(""); // Estado para almacenar el valor del input de búsqueda
   const [filteredClientes, setFilteredClientes] = useState([]); // Estado para almacenar los clientes filtrados
 
@@ -30,6 +31,8 @@ export default AgregarTurnoModal = ({ nameDay, numberDay, month, cerrarModal, vi
     <View style={{width:'100%',padding:5}}>
         <TouchableOpacity style={{borderRadius:10,borderWidth:1,padding:5}} onPress={
             () => {
+
+                addTurnos(`${month}${anio}`,numberDay,item,time)              
                 cerrarModal()
                 console.log("Seleccionado:", item)
             }
@@ -50,10 +53,10 @@ export default AgregarTurnoModal = ({ nameDay, numberDay, month, cerrarModal, vi
     )
   }
 
-  const BotonAgregar=()=>{
+  const BotonAgregarNewCliente=()=>{
     return(
         <View style={{alignItems:'center'}}>
-                <TouchableOpacity style={styles.btn} onPress={()=>{console.log("se agregara el siguiente cliente: "+valorInput)}}>
+                <TouchableOpacity style={styles.btn} onPress={()=>{}}>
                     <Text>Agregar Nuevo Cliente</Text>
                </TouchableOpacity>
         </View>
@@ -100,7 +103,7 @@ export default AgregarTurnoModal = ({ nameDay, numberDay, month, cerrarModal, vi
         </View>
 
         {/* La FlatList que mostrará los resultados filtrados */}
-        {filteredClientes.length>0?<MostrarLista/>:<BotonAgregar />}
+        {filteredClientes.length>0?<MostrarLista/>:<BotonAgregarNewCliente />}
 
             </View>
             

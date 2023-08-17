@@ -1,26 +1,40 @@
 import React, { useState,useEffect } from "react";
-import { View, Modal, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { fetchAllClientes } from "../../database/databaseClientes";
+import { View, Modal, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { fetchDatosCliente, updateClientes } from "../../database/databaseClientes";
+import DatoClienteModal from "./datoClienteModal";
 import DesplegableModal from './desplegableModal'
-
 
 const FichaClienteModal = ({ idCliente,nameCliente, closeModal, visible }) => {
 
     const[desplegableVisible,setDesplegableVisible]=useState(false);
     const[desplegableDatos,setDesplegableDatos]=useState([]);
     const[titleDesplegable,setTitleDesplegable]=useState("");
-    const[valueIdCliente,setValueIdCliente]=useState();
+    
+    //modal DATOS DEL CLIENTE
+    const[ModalDatosClienteVisible,setModalDatosClienteVisible]=useState(false);
+
+    
+
+    const[hayCambios,setHayCambios]=useState(false);
+    
     const[clave,setClave]=useState()
 
     // realizamos un fetch a la base de datos para traer los datos en un objeto
     //id, nombreCliente ,
-    const[objetoDatos,setOjetoDatos]=useState([{"adress":
+    const[objetoDatos,setOjetoDatos]=useState({
+        "adress":
         'beruty 2070',
         "phone":1133531540,
-        "estilista":"natalia soledad romero"}]);
-    const[objetoHistorial,setObjetoHistorial]=useState([]);
-    const[objetoDetalle,setObjetoDetalle]=useState([]);
+        "estilista":"natalia soledad romero"
+    });
+    const[objetoHistorial,setObjetoHistorial]=useState([{}]);
+    const[objetoDetalle,setObjetoDetalle]=useState({"altura": "No informado", "canas": "No informado", "centimetrosCrecimiento": "No informado", "colorDeseado": "No informado", "colorNatural": "No informado", "deseoCliente": "No informado", "formulaDecolorante": "No informado", "formulaTinte": "No informado", "longitud": "No informado", "nivelMedios": "No informado", "nivelPuntas": "No informado", "nivelRequerido": "No informado", "porosidad": "No informado", "procedimientos": "No informado", "tecnicasUtilizadas": "No informado", "textura": "No informado", "tratamientos": "No informado", "volumenesUtilizados": "No informado"});
 
+
+    //creamos la función para cerrar el ModalDatosClientes
+    const closeModalDC=()=>{
+        setModalDatosClienteVisible(false);
+    }
 //     const [datos,setDatos]=useState([
 
 // {"id":"100"},
@@ -58,23 +72,43 @@ const FichaClienteModal = ({ idCliente,nameCliente, closeModal, visible }) => {
 
     //creamos la función para traer los datos
     const traerDatos=()=>{
-        fetchAllClientes((data)=>{
-            let obj0=JSON.parse(data.objetoDatos)
-            setOjetoDatos(obj0);
-            console.log(obj0);
+console.log("idCliente:",idCliente)
+        //objetoDatos,objetoHistorial,objetoDetalle
+        fetchDatosCliente(idCliente, (data) => {
+          
+            if (data && data.length > 0) {
+              const clienteData = data[0];
+              console.log(clienteData.nombreCliente);  
+              
+              const objetoDatos = JSON.parse(clienteData.objetoDatos);
+              const objetoHistorial = JSON.parse(clienteData.objetoHistorial);
+              const objetoDetalle = JSON.parse(clienteData.objetoDetalle);
+          
+              // Ahora puedes acceder a las propiedades de los objetos como lo harías normalmente
+              console.log("Datos del cliente:", objetoDatos);
+              console.log("Historial del cliente:", objetoHistorial);
+              console.log("Detalle del cliente:", objetoDetalle);
+          
+              // Actualiza el estado si es necesario
+              setOjetoDatos(objetoDatos);
+              setObjetoHistorial(objetoHistorial);
+              setObjetoDetalle(objetoDetalle);
 
-            let obj1=JSON.parse(data[0])
-            setObjetoHistorial(obj1);
-            console.log(obj1);
-
-            let obj2=JSON.parse(data[0])
-            setObjetoDetalle(obj2);
-            console.log(obj2);
-        })
+            } else {
+              console.log("No se encontraron datos para el cliente con ID", idCliente);
+            }
+          });
+          
     }
     //utilizaos el useEfect para traer los datos de la database
     useEffect(
-        ()=>{idCliente!=undefined?traerDatos():null;}
+        ()=>{idCliente!=undefined?traerDatos():null;
+            //console.log("traer datos fichaClienteModal")
+            hayCambios!=false?setHayCambios(false):null;
+        }
+
+        
+        
     ,[idCliente])
 
 
@@ -84,9 +118,13 @@ const FichaClienteModal = ({ idCliente,nameCliente, closeModal, visible }) => {
     }
 
     const ActualizarDatos = (clave, valor) => {
-        setDatos(prevDatos => {
+        
+        console.log("clave: ",clave," valor: ",valor)
+        
+        setObjetoDetalle(prevDatos => {
           return { ...prevDatos, [clave]: valor };
-        });
+        })
+            console.log("...PrevDatos: ",objetoDetalle)
       };
 
       const enviarValores=(title,clave,array)=>{
@@ -243,6 +281,11 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
         )
       }
 
+      const GuardarCambios=()=>{
+        updateClientes(idCliente,nameCliente,JSON.stringify(objetoDatos),JSON.stringify(objetoHistorial),JSON.stringify(objetoDetalle))
+        setHayCambios(false)
+      }
+
       const RenderizarHistorial=()=>{
         return(
             <View style={styles.rowTable}>
@@ -263,7 +306,7 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
             </View>
             <ScrollView>
 
-                    <View style={styles.desingTabla}>
+                    <TouchableOpacity style={styles.desingTabla} onPress={()=>{setModalDatosClienteVisible(true)}}>
 
                         <Text style={styles.headerTable}>Datos del cliente</Text>
 
@@ -273,7 +316,7 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
 
                         <View style={styles.rowTable}><Text style={styles.clave}>Nombre del estilista:</Text><Text>{objetoDatos.estilista}</Text></View>
 
-                    </View>
+                    </TouchableOpacity>
 
 
                     {/* cuadro que indique los turnos previos */}
@@ -311,19 +354,31 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
         <View style={{display:'flex',flexDirection:'row',width:'100%'}}>
 
                 <View style={{alignItems:'center',padding:20,width:'50%'}}>
-                    <TouchableOpacity style={styles.btn} onPress={()=>{closeModal()}}>
+                    <TouchableOpacity style={styles.btn} onPress={()=>{
+                        
+                        if(hayCambios!==false){
+                            Alert.alert('Atención','No se guardarón los cambios realizados, antes de salir, ¿Desea GUARDARLOS?',[{text:'Si, guardar',onPress:()=>{GuardarCambios();closeModal()}},{text:'No, descartar cambios',onPress:()=>{setHayCambios(false);closeModal()}}])
+                        }else{
+                            closeModal();    
+                        }
+
+                        }}>
                         <Text style={{fontSize:16}}>Atras</Text>
                     </TouchableOpacity>
                 </View>
 
 
                 <View style={{alignItems:'center',padding:20,width:'50%'}}>
-                    <TouchableOpacity style={styles.btn} onPress={()=>{}}>
+                    <TouchableOpacity style={styles.btn} onPress={()=>{
+                        GuardarCambios();
+                    }}>
                         <Text style={{fontSize:16}}>Guardar</Text>
                     </TouchableOpacity>
                 </View>
         </View>
-        <DesplegableModal visible={desplegableVisible} close={desplegableClose} title={titleDesplegable} valoresSeleccion={desplegableDatos} actualizar={ActualizarDatos} clave={clave}/>
+
+        <DatoClienteModal visible={ModalDatosClienteVisible} close={closeModalDC} name={nameCliente} id={idCliente} datosClientes={objetoDatos} setDatos={setOjetoDatos} cambios={setHayCambios} />
+        <DesplegableModal visible={desplegableVisible} close={desplegableClose} title={titleDesplegable} valoresSeleccion={desplegableDatos} actualizar={ActualizarDatos} clave={clave} registrarCambios={setHayCambios}/>
 
     </Modal>
   );

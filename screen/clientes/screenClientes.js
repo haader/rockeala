@@ -5,23 +5,23 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import FichaClienteModal from "./FichaClienteModal";
 
-import { fetchClientes, addClientes } from "../../database/databaseClientes";
+import { fetchClientes, addClientes, deleteTableClientes, deleteClientes } from "../../database/databaseClientes";
 
 
 export default ScreenClientes = () => {
 
-  const objetoDatos=[
+  const objetoDatos=
   {
   "adress":"No informado",
-  "phone":"No informado",
+  "phone":"000000000",
   "estilista":"Natalia Soledad Romero"
-  }];
-  const objetoHistorial=[
-    {
+  };
+  const objetoHistorial=
+    [{
     
-  }
-  ];
-  const objetoDetalle=[{
+  }]
+  ;
+  const objetoDetalle={
     "longitud":"No informado",
     "textura":"No informado",
     "porosidad":"No informado",
@@ -40,7 +40,7 @@ export default ScreenClientes = () => {
     "formulaDecolorante": "No informado",
     "tecnicasUtilizadas": "No informado",
     "tratamientos": "No informado",
-    }]
+    }
 
   const [valorInput, setValorInput] = useState(""); // Estado para almacenar el valor del input de búsqueda
   const [filteredClientes, setFilteredClientes] = useState([]); // Estado para almacenar los clientes filtrados
@@ -55,6 +55,7 @@ export default ScreenClientes = () => {
 
   useEffect(()=>{
       traerDatos()  
+      //deleteTableClientes()
   },[])
   
   const [modalIsVisible, setModalIsVisible] = useState(false);
@@ -76,17 +77,27 @@ export default ScreenClientes = () => {
   const renderItem = ({ item }) => (
 
     <View style={{width:'100%',padding:5}}>
-        <TouchableOpacity style={{borderRadius:10,borderWidth:1,padding:10,marginLeft:5,marginRight:5}} onPress={
-            () => {
-              setSelectedCliente(item.nombreCliente);
-              setSelectedClienteID(item.id);
-              setModalIsVisible(true)
-                console.log("Seleccionado:", item)
-            }
-            
-            }>
-      <Text>{item.nombreCliente}</Text>
-    </TouchableOpacity>
+      <View style={{borderRadius:10,borderWidth:1,paddingLeft:10,marginLeft:5,marginRight:5,display:'flex',flexDirection:'row',alignItems:'center'}}>
+            <TouchableOpacity style={{height:40,width:'80%',marginRight:10,justifyContent:'center'}} onPress={
+                    () => {
+                      setSelectedCliente(item.nombreCliente);
+                      setSelectedClienteID(item.id);
+                      setModalIsVisible(true)
+                        console.log("Seleccionado:", item)
+                    }
+                    
+                    }>
+              <Text>{item.nombreCliente}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{borderRadius:50,backgroundColor:'red',padding:5}} onPress={()=>{
+              deleteClientes(item.id,item.nombreCliente)
+              traerDatos()
+              }}>
+              <AntDesign name="delete" size={24} color="black" />
+            </TouchableOpacity>
+      </View>
+        
     </View>
   );
 

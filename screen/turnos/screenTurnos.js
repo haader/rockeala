@@ -4,8 +4,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import bannerImage from '../../assets/banner.png';
 import iconImage from '../../assets/icon.png';
 import TurnosDayModal from "./TurnosDayModal";
+import { initMes } from "../../database/init/initDatabase";
 
 export default function ScreenTurnos() {
+  const[MonthAndYear,setMonthAndYear]=useEffect()
   const [thisAnio, setThisAnio] = useState();
   const [thisMes, setThisMes] = useState();
   const [thisDia, setThisDia] = useState();
@@ -22,14 +24,23 @@ export default function ScreenTurnos() {
   const[addTurno,setAddTurno]=useState(false);
 
   
+  useEffect(()=>{
 
+    initMes(MonthAndYear);
+
+  },[MonthAndYear])
 
   useEffect(() => {
+
+    //iniciamos la tabla del mes actual
+    
+
     //obtenemos los dias mes y anio actuales y guardamos las variables
     const currentDate = new Date();
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
     const day = currentDate.getDate();
+    
 
     setThisAnio(year);
     setThisMes(month);
@@ -37,6 +48,8 @@ export default function ScreenTurnos() {
 
     setSelectAnio(year);
     setSelectMes(month);
+
+    
 
     console.log(`${thisDia}/${thisMes}/${thisAnio}`);
   }, []);
@@ -131,9 +144,11 @@ export default function ScreenTurnos() {
 
   const next=()=>{
     setSelectMes(selectMes+1);
+    setMonthAndYear(`${selectMes+1}${thisAnio}`);
   }
   const prev=()=>{
     setSelectMes(selectMes-1);
+    setMonthAndYear(`${selectMes-1}${thisAnio}`);
     
   }
 
