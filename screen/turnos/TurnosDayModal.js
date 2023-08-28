@@ -1,29 +1,101 @@
 import React, { useEffect, useState } from "react";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity,ScrollView ,Button,View, Modal } from 'react-native';
+import { ImageBackground, StyleSheet, Text, TouchableOpacity,ScrollView ,Alert,Button,View, Modal } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import AgregarTurnoModal from "./AgregarTurnoModal";
+import EditarTurnoModal from "./EditarTurnoModal";
 import { fetchClientes } from "../../database/databaseClientes";
-import { fetchTurnos } from "../../database/init/initDatabase";
+import { deleteTurno, fetchTurnos } from "../../database/databaseTurnos";
+import { fetchPrecios } from "../../database/precios/databasePrecios";
+import LoadingScreen from "../../componentes/LoadingScreen";
 
-export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible, addTurno})=>{
+export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible, addTurno, prevDay, nextDay})=>{
 
-    const [visibleModalAddTurno,setVisibleModalAddTurno]=useState(false)
-    const [timeSelect,setTimeSelect]=useState("")
-    const [nameClientes,setNameClientes]=useState();
-    
+    const [loading,setLoading]=useState(false);
+    const [visibleModalAddTurno,setVisibleModalAddTurno]=useState(false);
+    const [visibleModalEditeTurno,setVisibleModalEditeTurno]=useState(false);
+    const [timeSelect,setTimeSelect]=useState("");
+    const [nameClientes,setNameClientes]=useState([{"id": 8, "nombreCliente": "Hola"}, {"id": 9, "nombreCliente": "Tres"}]);
+    const [listServicios, setListServicios]=useState([[{"id": 8, "servicio": "peinado","precio":"300"},{"id": 9, "servicio": "lavado","precio":"500"}]]);
+    //dia TEXT, cliente TEXT, hora TEXT
+    const [cronograma, setCronograma] = useState([]);
+    const [plantilla, setPlantilla] = useState([
+      
+        { "hora": "08","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "09","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "10","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "11","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "12","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "13","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "14","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "15","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "16","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "17","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "18","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "19","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "20","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "21","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "22","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""},
+        { "hora": "23","cliente": 'Horario Disponible', "dia": "33", "servicio": "No informado","descripcion": ""}
+        
+      ]);
+
+      const cargarTurnos=()=>{
+        if(month!==undefined&&year!==undefined&&numberDay!==undefined){
+            setLoading(true);
+            fetchTurnos(`table${month}${year}`, numberDay, 
+        (datosDesdeDB) => {
+            // console.log("Turnos para el dia:",numberDay);
+            datosDesdeDB.map(item=>console.log("->",item));
+          
+            const resultado = plantilla.map(itemPlantilla => {
+                const item2 = datosDesdeDB.find(itemDatosDesdeDB => itemDatosDesdeDB.hora === itemPlantilla.hora);
+                if (item2) {
+                  return item2;
+                }
+                return itemPlantilla;
+              });
+              //luego del map iteramos en consola
+            //   console.log("-MAPEADO: ",);
+            //   resultado.map(item=>{console.log("-hora:",item.hora,"-cliente:",item.cliente,"-Servicio:",item.servicio)})
+            //   console.log("--------",);
+
+              if(resultado.length>0){setCronograma(resultado);setLoading(false);}
+
+          },(datosDesdeDB)=>{
+            console.log(datosDesdeDB)
+            setCronograma(plantilla)
+            setLoading(false);
+          });
+        }
+        
+        
+      }
+      
     //traemos los nombres de los usuarios
     useEffect(()=>{
         
-        fetchClientes(data=>{
+        fetchClientes((data)=>{
             setNameClientes(data)
+            console.log("CLIENTES",data)
         })
-        console.log("trayendo nombre de clientes")
 
-        fetchTurnos(`${month}${year}`,numberDay,(datos)=>{setDatos(datos)})
+        
 
-    },[numberDay])
+            fetchPrecios((data)=>{
+              setListServicios(data)
+            })
+        
+          
+
+        console.log("trayendo nombre de clientes y servicios")
+
+
+        cargarTurnos();  
+          
+
+    },[numberDay]);
 
 
     const nameDay=(numberDay,month,year)=>{
@@ -49,57 +121,39 @@ export default TurnosDayModal=({numberDay,month,year,cerrarModal, estadoVisible,
 }
 
 //'CREATE TABLE IF NOT EXISTS ? (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-//dia TEXT, cliente TEXT, hora TEXT
-    const [datos, setDatos] = useState([
-        { "cliente": 'Horario Disponible', "hora": '08' },
-        { "cliente": 'Horario Disponible', "hora": '09' },
-        { "cliente": 'Horario Disponible', "hora": '10' },
-        { "cliente": 'Horario Disponible', "hora": '11' },
-        { "cliente": 'Horario Disponible', "hora": '12' },
-        { "cliente": 'Horario Disponible', "hora": '13' },
-        { "cliente": 'Horario Disponible', "hora": '14' },
-        { "cliente": 'Horario Disponible', "hora": '15' },
-        { "cliente": 'Horario Disponible', "hora": '16' },
-        { "cliente": 'Horario Disponible', "hora": '17' },
-        { "cliente": 'Horario Disponible', "hora": '18' },
-        { "cliente": 'Horario Disponible', "hora": '19' },
-        { "cliente": 'Horario Disponible', "hora": '20' },
-        { "cliente": 'Horario Disponible', "hora": '21' },
-        { "cliente": 'Horario Disponible', "hora": '22' },
-        { "cliente": 'Horario Disponible', "hora": '23' },
-        
-      ]);
-      
 
-// Consultar en la base de datos los turnos para el dia yn el mes elegido
-// Renderizamos los datos traidos:
+
+// Consultar en la base de cronograma los turnos para el dia yn el mes elegido
+// Renderizamos los cronograma traidos:
 // Horario, Clientes
 
 // Funciones que debe tener:
 // eliminar, agregar turno
 const agregarTurno=(time)=>{
-    console.log("-agregar time"+time)
+    console.log("-agregar time: "+time)
     setTimeSelect(time)
     setVisibleModalAddTurno(true)
  
 }
-const eliminarTurno=()=>{
-    console.log("-eliminar")
+const eliminarTurno=(tabla,dia,hora)=>{
+    Alert.alert('Atención','¿Desea eliminar el turno Seleccionado?',[{text:'Si',onPress:()=>{deleteTurno(tabla,dia,hora,()=>{cargarTurnos()})}},{text:'No',onPress:()=>{}}])
 }
-const editarTurno=()=>{
-    console.log("-editar")
+const editarTurno=(time)=>{
+    console.log("-Editar time: "+time)
+    setTimeSelect(time)
+    setVisibleModalEditeTurno(true)
 }
 
 
-const BtnAcciones=()=>{
+const BtnAcciones=({time})=>{
     return(
         <View style={styles.btn}>
                 {/* editar */}
-                <TouchableOpacity onPress={()=>editarTurno()}>
+                <TouchableOpacity onPress={()=>editarTurno(time)}>
                     <AntDesign name="edit" size={24} color="chocolate" />
                 </TouchableOpacity>
                 {/* eliminar */}
-                <TouchableOpacity style={{marginLeft:10}} onPress={()=>eliminarTurno()}>
+                <TouchableOpacity style={{marginLeft:10}} onPress={()=>eliminarTurno(`table${month}${year}`,numberDay,time)}>
                         <AntDesign name="closecircle" size={24} color="red" />
                 </TouchableOpacity>
         </View>
@@ -137,16 +191,19 @@ const Horarios=()=>{
 
         <View style={styles.ficha} key={`hora${hora}`}>
             {/* si esta vacio */}
-            <View style={[styles.hora,datos[hora-8].cliente!=undefined?styles.horaWhite:styles.horaBlack]}>
+            <View style={[styles.hora,cronograma[hora-8].cliente!=='Horario Disponible'?styles.horaWhite:styles.horaBlack]}>
                 {/* si NO esta vacio, es decir "Horario Disponible"*/}
-                {datos[hora-8].cliente=='Horario Disponible'?<MaterialCommunityIcons name="circle-outline" size={24} color="white" />:<MaterialIcons name="check-circle-outline" size={24} color="green" />}
-                <Text style={datos[hora-8].cliente=='Horario Disponible'?styles.textWhite:styles.textBlack}>{datos[hora-8].hora}:00 hs</Text>
+                {cronograma[hora-8].cliente=='Horario Disponible'?<MaterialCommunityIcons name="circle-outline" size={24} color="white" />:<MaterialIcons name="check-circle-outline" size={24} color="green" />}
+                <Text style={cronograma[hora-8].cliente!=='Horario Disponible'?styles.textBlack:styles.textWhite}>{cronograma[hora-8].hora}:00 hs</Text>
             </View>
             
             <View style={styles.body}>
-                <Text>{datos[hora-8].cliente}</Text>
+            {cronograma[hora-8].cliente==(''||'Horario Disponible')?<Text>{cronograma[hora-8].cliente}</Text>:<Text style={{fontWeight:'bold',fontSize:18}}> {cronograma[hora-8].cliente}</Text>}
+                {cronograma[hora-8].servicio==(''||'No informado')?null:<Text style={{fontSize:8}}><Text style={{fontWeight:'bold',fontSize:10}}>-Servico:</Text> {cronograma[hora-8].servicio}</Text>}
+                {cronograma[hora-8].descripcion==("")?null:<Text style={{fontSize:8}}><Text style={{fontWeight:'bold',fontSize:10}}>-Detalle:</Text> {cronograma[hora-8].descripcion}</Text>}
+                
             </View>
-            {datos[hora - 8].cliente!='Horario Disponible' ? <BtnAcciones /> : <BtnAgregar addTurno={addTurno} time={datos[hora - 8].hora}/>}
+            {cronograma[hora - 8].cliente!='Horario Disponible' ? <BtnAcciones time={cronograma[hora - 8].hora} /> : <BtnAgregar addTurno={addTurno} time={cronograma[hora - 8].hora}/>}
         </View>
 
         )
@@ -156,28 +213,37 @@ const Horarios=()=>{
     return(<View style={styles.column}>{horarios}</View>)
 }
 
+
 const anterior=()=>{
-    console.log("anteriror");
+    setLoading(true);
+    prevDay()
 }
 const siguiente=()=>{
-    console.log("siguiente");
+    setLoading(true);
+    nextDay()
 }
 
 const closeModal=()=>{
     setVisibleModalAddTurno(false)
 }
 
+const closeModalEdite=()=>{
+    setVisibleModalEditeTurno(false)
+}
+
     return(
         <Modal visible={estadoVisible} onRequestClose={cerrarModal}>
 
+            {loading && (<LoadingScreen/>)}
+
             <View style={styles.title}>
-            <TouchableOpacity onPress={anterior()}>
+            <TouchableOpacity onPress={()=>anterior()}>
                 <MaterialIcons name="navigate-before" size={50} color="black" />
             </TouchableOpacity>
                 <Text>{nameDay(numberDay,month,year)}</Text>
                 <Text>{numberDay}/</Text>
                 <Text>{month}</Text>
-            <TouchableOpacity onPress={siguiente()}>
+            <TouchableOpacity onPress={()=>siguiente()}>
                 <MaterialIcons name="navigate-next" size={50} color="black" />
             </TouchableOpacity>
         
@@ -190,7 +256,7 @@ const closeModal=()=>{
 
             <ScrollView >
                 <View style={styles.column}>
-                    <Horarios/>
+                    {cronograma.length>0?<Horarios/>:null}
                 </View>
             </ScrollView>
 
@@ -198,7 +264,8 @@ const closeModal=()=>{
                 <AntDesign name="closecircleo" size={50} color="black" />
             </TouchableOpacity>
             
-            <AgregarTurnoModal anio={year} nameDay={nameDay(numberDay,month,year)} numberDay={numberDay} month={month} visible={visibleModalAddTurno} cerrarModal={closeModal} time={timeSelect} clientes={nameClientes}/>
+            <AgregarTurnoModal anio={year} nameDay={nameDay(numberDay,month,year)} numberDay={numberDay} month={month} visible={visibleModalAddTurno} cerrarModal={closeModal} time={timeSelect} servicios={listServicios} clientes={nameClientes} actualizarTurnos={cargarTurnos}/>
+            <EditarTurnoModal anio={year} nameDay={nameDay(numberDay,month,year)} numberDay={numberDay} month={month} visible={visibleModalEditeTurno} cerrarModal={closeModalEdite} time={timeSelect} servicios={listServicios} clientes={nameClientes} actualizarTurnos={cargarTurnos}/>
 
 
         </Modal>

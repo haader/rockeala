@@ -3,17 +3,18 @@ import { ImageBackground, StyleSheet, Text, TouchableOpacity, ScrollView, Button
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { addTurnos } from "../../database/databaseTurnos";
+import { editTurnos } from "../../database/databaseTurnos";
 import { fetchClientes, addClientes} from "../../database/databaseClientes";
 
 
-export default AgregarTurnoModal = ({anio,nameDay, numberDay, month, cerrarModal, visible, time, clientes,servicios, actualizarTurnos }) => {
+export default EditarTurnoModal = ({anio,nameDay, numberDay, month, cerrarModal, visible, time, clientes,servicios, actualizarTurnos }) => {
   const [valorInput, setValorInput] = useState(""); // Estado para almacenar el valor del input de búsqueda
   const [filteredClientes, setFilteredClientes] = useState([]); // Estado para almacenar los clientes filtrados
   const [filteredServicios, setFilteredServicios] = useState([]);
 
   const [listaCliente,setListaCliente]=useState(clientes);
 
+  //cliente seleccion
   const [clienteSeleccion,setClienteSeleccion]=useState("");
   const [etapa1,setEtapa1]=useState(true);
   const [etapa2,setEtapa2]=useState(false);
@@ -21,9 +22,11 @@ export default AgregarTurnoModal = ({anio,nameDay, numberDay, month, cerrarModal
 
   const [save,setSave]=useState(false);
 
+  //sercicios seleccion
+  const [serviciosSeleccion,setServiciosSeleccion]=useState("");
   const [ListServicios,setListServicios]=useState(servicios);
   const [inputServicios,setInputServicios]=useState("");
-  const [serviciosSeleccion,setServiciosSeleccion]=useState("");
+  
 
   const [descripcionInput,setDescripcionInput]=useState('')
 
@@ -85,9 +88,10 @@ const anterior = () => {
 
     if(clienteSeleccion!==''&&serviciosSeleccion!==''){
         
-      Alert.alert('Atension!',`se agregara un nuevo turno: Cliente: ${clienteSeleccion} Servicio: ${serviciosSeleccion}`,[{text:'Si',onPress:()=>{
+      Alert.alert('Atencion!',`se editara el turno: Cliente: ${clienteSeleccion} Servicio: ${serviciosSeleccion}`,[{text:'Si',onPress:()=>{
 
-          addTurnos(`table${month}${anio}`,numberDay,time,clienteSeleccion,serviciosSeleccion,descripcionInput,actualizarTurnos,()=>cerrarModal())              
+          //addTurnos(`table${month}${anio}`,numberDay,time,clienteSeleccion,serviciosSeleccion,descripcionInput,actualizarTurnos,()=>cerrarModal())              
+          editTurnos(`table${month}${anio}`,numberDay,time,clienteSeleccion,serviciosSeleccion,descripcionInput,actualizarTurnos,cerrarModal)              
 
       }},{text:'No',onPress:()=>{}}])
       

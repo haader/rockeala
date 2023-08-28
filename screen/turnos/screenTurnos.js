@@ -7,7 +7,7 @@ import TurnosDayModal from "./TurnosDayModal";
 import { initMes } from "../../database/init/initDatabase";
 
 export default function ScreenTurnos() {
-  const[MonthAndYear,setMonthAndYear]=useEffect()
+  const[monthAndYear,setMonthAndYear]=useState('')
   const [thisAnio, setThisAnio] = useState();
   const [thisMes, setThisMes] = useState();
   const [thisDia, setThisDia] = useState();
@@ -16,19 +16,19 @@ export default function ScreenTurnos() {
   const[selectMes,setSelectMes]=useState();
   const[selectAnio,setSelectAnio]=useState();
 
+
   // const [dirImg,setDirImg]=useState(iconImage);
-  const nameMeses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','noviembre','diciembre'];
+  const nameMeses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   // const [closeModal,setCloseModal]=useState(false);
   const [estadoVisible,setEstadoVisible]=useState(false);
   //colocamos una nueva variable para limitar el add de turnos a dias que ya pasaron
   const[addTurno,setAddTurno]=useState(false);
 
-  
   useEffect(()=>{
 
-    initMes(MonthAndYear);
+    initMes(monthAndYear);
 
-  },[MonthAndYear])
+  },[monthAndYear])
 
   useEffect(() => {
 
@@ -46,12 +46,15 @@ export default function ScreenTurnos() {
     setThisMes(month);
     setThisDia(day);
 
+    //colocamos los valores iniciales a las selecciones
     setSelectAnio(year);
     setSelectMes(month);
+    setSelectDia(day)
 
-    
+    //creamos la tabla del mes actual si no existe
+    setMonthAndYear(`table${month}${year}`);
 
-    console.log(`${thisDia}/${thisMes}/${thisAnio}`);
+    console.log(`fecha actual: ${day}/${month}/${year}`);
   }, []);
 
   //función para ver el Modal con los turnos
@@ -85,7 +88,7 @@ export default function ScreenTurnos() {
       //si el dia actual es igual al que se renderiza cambia de color
       //si los dias ya pasaron cambia de color
       
-      const isCurrentDay = thisDay === day && thisMonth === selectMes;
+      const isCurrentDay = thisDay === day && thisMonth === selectMes && thisAnio == selectAnio;
       const dayStyle = isCurrentDay ? [styles.day, styles.currentDay] :  day<thisDay && thisMonth === selectMes ?styles.passDay:styles.day;
       
       
@@ -123,7 +126,7 @@ export default function ScreenTurnos() {
       );
       if(day==daysInMonth){
         calendar.push(
-          <View key={`semana${day}`} style={{width:'100%',display:'flex',flexDirection:'row'}}>
+          <View key={`semanaFin${day}`} style={{width:'100%',display:'flex',flexDirection:'row'}}>
             {semana}
           </View>
         )
@@ -142,28 +145,56 @@ export default function ScreenTurnos() {
   //   }
   // };
 
-  const next=()=>{
-    setSelectMes(selectMes+1);
-    setMonthAndYear(`${selectMes+1}${thisAnio}`);
-  }
-  const prev=()=>{
-    setSelectMes(selectMes-1);
-    setMonthAndYear(`${selectMes-1}${thisAnio}`);
+  const nextMonth=()=>{
+    if(selectMes>=12){
+      setSelectMes(1);
+      setSelectAnio(prevSelectAnio=>prevSelectAnio+1);
+      setMonthAndYear(`table1${selectAnio+1}`);
+    }else{
+      setSelectMes(prevSelectMes=>prevSelectMes+1);
+      setMonthAndYear(`table${selectMes+1}${selectAnio}`);
+    }
     
   }
+  const prevMonth=()=>{
+
+    if(selectMes<=1){
+      setSelectMes(12);
+      setSelectAnio(prevSelectAnio=>prevSelectAnio-1);
+      setMonthAndYear(`table12${selectAnio-1}`);
+    }else{
+      setSelectMes(prevSelectMes=>prevSelectMes-1);
+      setMonthAndYear(`table${selectMes-1}${selectAnio}`);
+    }
+  }
+
+ 
+//son funciones que se pasas al MODAL (turnosDayModal)
+  const anteriorDia = () => {
+    console.log("anterior día");
+    setSelectDia(prevSelectDia => prevSelectDia - 1);
+  }
+  
+  const siguienteDia = () => {
+    console.log("siguiente día");
+    setSelectDia(prevSelectDia => prevSelectDia + 1);
+  }
+  
 
   return (
     <View style={{ flex: 1, alignItems: 'center',height:'100%' }}>
       
-      <TurnosDayModal 
+      {selectDia&& (<TurnosDayModal 
       nameDay={nameMeses[thisMes-1]} 
       numberDay={selectDia} 
+      prevDay={()=>anteriorDia()}
+      nextDay={()=>siguienteDia()}
       month={selectMes} 
       year={selectAnio} 
       estadoVisible={estadoVisible} 
       cerrarModal={ChangeEstadoVisible}
       addTurno={addTurno}
-      />
+      />)}
       
       {/* <TouchableOpacity onPress={toggleImage} style={{height:'20%',width:'100%',position:'absolute',top:0}}>
           <ImageBackground source={dirImg} style={styles.img}>
@@ -175,23 +206,28 @@ export default function ScreenTurnos() {
         </View>
 
       <View style={styles.calendarioHead}>
+           
+           <View stle={{width:'100%'}}>
+                <Text style={styles.thisMes}>{selectAnio}</Text>
+           </View>
             <View style={[styles.row,{justifyContent:'center'}]}>
-                          <TouchableOpacity onPress={prev}>
+                       
+                          <TouchableOpacity onPress={prevMonth}>
                         <MaterialIcons name="navigate-before" size={50} color="white" />
                       </TouchableOpacity>
                       
-                      <View style={[styles.column,{alignItems:'center',width:'60%'}]}>
+                      <View style={[styles.column,{alignItems:'center',justifyContent:'center',width:'60%'}]}>
                             
-                                <Text style={styles.thisMes}>{nameMeses[selectMes-1]}</Text>
+                                  <Text style={styles.thisMes}>{nameMeses[selectMes-1]}</Text>
                             
-                            <View style={[styles.row,{alignItems:'center',width:'30%'}]}>
+                            {/* <View style={[styles.row,{alignItems:'center',width:'30%'}]}>
                                 <Text style={styles.fecha}>{thisDia}/</Text>
                                 <Text style={styles.fecha}>{selectMes}/</Text>
                                 <Text style={styles.fecha}>{thisAnio}</Text>
-                            </View>
+                            </View> */}
                       </View>
 
-                      <TouchableOpacity onPress={next}>
+                      <TouchableOpacity onPress={nextMonth}>
                           <MaterialIcons name="navigate-next" size={50} color="white" />
                       </TouchableOpacity>
                     
@@ -213,7 +249,25 @@ export default function ScreenTurnos() {
       {/* <View style={[styles.column]}> */}
       <RenderizarSemana thisMonth={thisMes} thisDay={thisDia}/>
       {/* </View> */}
+
+      <View style={{borderRadius:10,borderWidth:1,padding:10,margin:10}}>
+        
+          <Text>Hoy es {thisDia}/{thisMes}/{thisAnio}</Text>
+        
+      </View>
       
+
+     {(thisMes!=selectMes||thisAnio!=selectAnio) && ( <View style={{borderRadius:10,borderWidth:1,padding:10,margin:10}}>
+        <TouchableOpacity onPress={()=>{
+          setSelectDia(thisDia);
+          setSelectMes(thisMes);
+          setSelectAnio(thisAnio)
+        }}>
+          <Text>Volver a {nameMeses[thisMes-1]} de {thisAnio}</Text>
+        </TouchableOpacity>
+      </View>)}
+      
+
     </View>
   );
 }

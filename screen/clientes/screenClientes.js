@@ -10,37 +10,6 @@ import { fetchClientes, addClientes, deleteTableClientes, deleteClientes } from 
 
 export default ScreenClientes = () => {
 
-  const objetoDatos=
-  {
-  "adress":"No informado",
-  "phone":"000000000",
-  "estilista":"Natalia Soledad Romero"
-  };
-  const objetoHistorial=
-    [{
-    
-  }]
-  ;
-  const objetoDetalle={
-    "longitud":"No informado",
-    "textura":"No informado",
-    "porosidad":"No informado",
-    "colorNatural":"No informado",
-    "colorDeseado":"No informado",
-    "nivelRequerido":"No informado",
-    "canas": "No informado",
-    "procedimientos": "No informado",
-    "altura": "No informado",
-    "volumenesUtilizados": "No informado",
-    "formulaTinte": "No informado",
-    "centimetrosCrecimiento": "No informado",
-    "nivelMedios": "No informado",
-    "nivelPuntas": "No informado",
-    "deseoCliente": "No informado",
-    "formulaDecolorante": "No informado",
-    "tecnicasUtilizadas": "No informado",
-    "tratamientos": "No informado",
-    }
 
   const [valorInput, setValorInput] = useState(""); // Estado para almacenar el valor del input de búsqueda
   const [filteredClientes, setFilteredClientes] = useState([]); // Estado para almacenar los clientes filtrados
@@ -91,8 +60,9 @@ export default ScreenClientes = () => {
             </TouchableOpacity>
 
             <TouchableOpacity style={{borderRadius:50,backgroundColor:'red',padding:5}} onPress={()=>{
-              deleteClientes(item.id,item.nombreCliente)
-              traerDatos()
+              deleteClientes(item.id,item.nombreCliente);
+              setValorInput('');
+              traerDatos();
               }}>
               <AntDesign name="delete" size={24} color="black" />
             </TouchableOpacity>
@@ -135,8 +105,8 @@ export default ScreenClientes = () => {
           [{
             text:'Si',
             onPress:()=>{
-              addClientes(valorInput,objetoDatos,objetoHistorial,objetoDetalle);
-              traerDatos();
+              addClientes(valorInput,()=>{traerDatos()});
+              
             },
             style:'default'
           },

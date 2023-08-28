@@ -3,6 +3,7 @@ import { View, Modal, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } fr
 import { fetchDatosCliente, updateClientes } from "../../database/databaseClientes";
 import DatoClienteModal from "./datoClienteModal";
 import DesplegableModal from './desplegableModal'
+import HistorialTurnoClienteModal from "./historialTurnoClienteModal";
 
 const FichaClienteModal = ({ idCliente,nameCliente, closeModal, visible }) => {
 
@@ -30,6 +31,12 @@ const FichaClienteModal = ({ idCliente,nameCliente, closeModal, visible }) => {
     const[objetoHistorial,setObjetoHistorial]=useState([{}]);
     const[objetoDetalle,setObjetoDetalle]=useState({"altura": "No informado", "canas": "No informado", "centimetrosCrecimiento": "No informado", "colorDeseado": "No informado", "colorNatural": "No informado", "deseoCliente": "No informado", "formulaDecolorante": "No informado", "formulaTinte": "No informado", "longitud": "No informado", "nivelMedios": "No informado", "nivelPuntas": "No informado", "nivelRequerido": "No informado", "porosidad": "No informado", "procedimientos": "No informado", "tecnicasUtilizadas": "No informado", "textura": "No informado", "tratamientos": "No informado", "volumenesUtilizados": "No informado"});
 
+    const[historialVisible,setHistorialVisible]=useState(false);
+    
+
+    const historialClose=()=>{
+        setHistorialVisible(false);
+    }
 
     //creamos la función para cerrar el ModalDatosClientes
     const closeModalDC=()=>{
@@ -287,16 +294,29 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
       }
 
       const RenderizarHistorial=()=>{
-        return(
-            <View style={styles.rowTable}>
-                            <Text style={styles.widthTabla}>{objetoHistorial.fecha}</Text>
-                            <Text style={styles.widthTabla}>{objetoHistorial.descripción}</Text>
-                            <Text style={styles.widthTabla}>{objetoHistorial.importe}</Text>
-                            <Text style={styles.widthTabla}>{objetoHistorial.deuda}</Text>
-                            <Text style={styles.widthTabla}></Text>
-                        </View>
-        )
-      }
+        
+        let tamaño=objetoHistorial.length;
+
+            if(tamaño>0){
+                return(
+                    <View style={styles.row}>
+                        <Text style={styles.fecha}>{objetoHistorial[tamaño-1].fecha}</Text>
+                        <Text style={styles.tratamiento}>{objetoHistorial[tamaño-1].tratamiento}</Text>
+                        <Text style={styles.descripcion}>{objetoHistorial[tamaño-1].descripcion}</Text>
+                    </View>
+                    )
+            }else{
+
+                return(
+                    <View style={{width:'100%'}}>
+                            <Text style={{textAlign:'center'}}>No hay historial previo</Text>
+                    </View>
+                )
+                    }
+         
+                }   
+        
+      
 
   return (
     <Modal visible={visible} onRequestClose={closeModal}>
@@ -322,7 +342,12 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
                     {/* cuadro que indique los turnos previos */}
                     {/* muestra los ultimo 4 turnos agregar un btn que diga ver mas para ver las fechas completas*/}
 
-                    <View style={[styles.column,styles.desingTabla,{paddingBottom:30}]}>
+                    <TouchableOpacity style={[styles.column,styles.desingTabla,{paddingBottom:30}]}
+                    onPress={()=>{
+                        setHistorialVisible(true);
+                    }}
+                    >
+                    
                     <Text style={styles.headerTable}>Historial de Atencion</Text>
 
                         <View style={styles.rowTable}>
@@ -344,7 +369,7 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
                             <Text style={[styles.widthTabla,{position:'absolute',right:0}]}>total</Text>
                         </View>
 
-                    </View>
+                    </TouchableOpacity>
 
                     {objetoDetalle&&<Body/>}
 
@@ -379,7 +404,7 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
 
         <DatoClienteModal visible={ModalDatosClienteVisible} close={closeModalDC} name={nameCliente} id={idCliente} datosClientes={objetoDatos} setDatos={setOjetoDatos} cambios={setHayCambios} />
         <DesplegableModal visible={desplegableVisible} close={desplegableClose} title={titleDesplegable} valoresSeleccion={desplegableDatos} actualizar={ActualizarDatos} clave={clave} registrarCambios={setHayCambios}/>
-
+        <HistorialTurnoClienteModal visible={historialVisible} close={historialClose} datosHistorialCliente={objetoHistorial}/>
     </Modal>
   );
 };
@@ -435,7 +460,21 @@ const styles = StyleSheet.create({
       },
       valor:{
 
-      }
+      },
+      fecha:{
+        width:'20%',
+        justifyContent:'center'
+    },
+    tratamiento:{
+        width:'20%',
+        justifyContent:'center'
+    },
+    descripcion:{
+        width:'20%',
+        justifyContent:'center'
+    },
+
+
 });
 
 export default FichaClienteModal;

@@ -13,6 +13,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ScreenStock from './screen/stock/screenStock';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {initTablaPrecios, initTablaStock, initTablaClientes, initTablaGastos} from './database/init/initDatabase'
+import LoadingScreen from './componentes/LoadingScreen';
+import Tablas from './screen/tablas/tablas';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -57,7 +59,7 @@ export default function App() {
            , headerTitle: () => (
               <View style={{alignItems:'center'}}>
                 <Text style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}>Rockeala</Text>
-                <Text style={{ fontSize: 10, fontWeight: '200', color: 'black' }}>bar rock and coffee</Text>
+                <Text style={{ fontSize: 10, fontWeight: '200', color: 'black' }}>hair rock and coffee</Text>
                 
               </View>
             ),headerTitleAlign: 'center',
@@ -71,9 +73,11 @@ export default function App() {
           tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
         })}
         >
-          <Tab.Screen name="Clientes" component={ScreenClientes} />
+          {/* <Tab.Screen name="Tablas" component={Tablas} /> */}
+          <Tab.Screen name="Load" component={LoadingScreen} />
+
           <Tab.Screen name="Turnos" component={ScreenTurnos} />
-          
+          <Tab.Screen name="Clientes" component={ScreenClientes} />
           <Tab.Screen name="Gastos" component={ScreenGastos} />
           <Tab.Screen name="Stock" component={ScreenStock} />
           <Tab.Screen name="Precios" component={ScreenPrecios} />

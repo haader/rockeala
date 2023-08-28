@@ -6,8 +6,43 @@ const database = SQLite.openDatabase('dataBasePeluqueria.db');
 
 //funciones para la tabla CLIENTES (add,delete,update,fetch)
 
-export const addClientes=(nombreCliente,objetoDatos,objetoHistorial,objetoDetalle)=>{
-    database.transaction((tx)=>{
+export const addClientes=(nombreCliente,callback)=>{
+  
+  const objetoDatos=
+  {
+  "adress":"No informado",
+  "phone":"000000000",
+  "estilista":"Natalia Soledad Romero"
+  };
+  const objetoHistorial=
+    [{
+    
+  }]
+  ;
+  const objetoDetalle={
+    "longitud":"No informado",
+    "textura":"No informado",
+    "porosidad":"No informado",
+    "colorNatural":"No informado",
+    "colorDeseado":"No informado",
+    "nivelRequerido":"No informado",
+    "canas": "No informado",
+    "procedimientos": "No informado",
+    "altura": "No informado",
+    "volumenesUtilizados": "No informado",
+    "formulaTinte": "No informado",
+    "centimetrosCrecimiento": "No informado",
+    "nivelMedios": "No informado",
+    "nivelPuntas": "No informado",
+    "deseoCliente": "No informado",
+    "formulaDecolorante": "No informado",
+    "tecnicasUtilizadas": "No informado",
+    "tratamientos": "No informado",
+    }
+
+  
+  
+  database.transaction((tx)=>{
       tx.executeSql('INSERT INTO clientes (nombreCliente, objetoDatos, objetoHistorial, objetoDetalle) values  (?,?,?,?)', 
       
       [nombreCliente,JSON.stringify(objetoDatos), JSON.stringify(objetoHistorial), JSON.stringify(objetoDetalle)],
@@ -26,12 +61,16 @@ export const addClientes=(nombreCliente,objetoDatos,objetoHistorial,objetoDetall
               },
             ]
           );
+          callback()
         } else {
           console.log("No se pudieron guardar los datos en la tabla CLIENTES.");
         }
       },)
     })
   }
+
+
+  
 
   export const deleteClientes=(id,name)=>{
 
