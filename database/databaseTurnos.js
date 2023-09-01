@@ -35,29 +35,98 @@ import { Alert } from 'react-native'; // Importamos FlatList y TextInput
         'SELECT objetoHistorial FROM clientes WHERE nombreCliente = ?',
         [cliente],
         (txObj, resultSet) => {
+      
+          
           if (resultSet.rows.length > 0) {
-            const existingObject = JSON.parse(resultSet.rows.item(0).objetoHistorial);
-  console.warn("****** addHistorial:",JSON.stringify(existingObject))
-            if (Array.isArray(existingObject.arrayField)) {
-              existingObject.arrayField.push(newObjeto);
-  
-              const updatedObject = JSON.stringify(existingObject);
-  
-              tx.executeSql(
-                'UPDATE clientes SET objetoHistorial = ? WHERE nombreCliente = ?',
-                [updatedObject, cliente],
-                (txObj, resultSet) => {
-                  console.warn('********Nuevo objeto agregado al array correctamente',resultSet);
-                  if (resultSet.rowsAffected > 0) {
-                    console.warn('********Nuevo objeto agregado al array correctamente');
-                  }
-                },
-                (error) => {
-                  console.error('Error al actualizar el objeto: ', error);
-                }
-              );
+            console.log("objeto traido de la db:",resultSet.rows.item(0).objetoHistorial)
+            let existingObject = JSON.parse(resultSet.rows.item(0).objetoHistorial);
+            
+            // Verificar si el objeto existente es un array vacío o no tiene un campo arrayField
+            if (!Array.isArray(existingObject.arrayField)) {
+              existingObject.arrayField = []; // Inicializar como array vacío si no es un array válido
             }
+          
+            console.warn("****** addHistorial: objeto existente:", JSON.stringify(existingObject));
+            console.warn("****** addHistorial: nuevo objeto ", JSON.stringify(newObjeto));
+          
+            existingObject.push(newObjeto[0]); // Agregar el nuevo objeto al arrayField
+          
+            const updatedObject = JSON.stringify(existingObject);
+            console.warn("****** addHistorial:  objeto resultante", updatedObject);
+          //' clientes ( nombreCliente TEXT, objetoDatos TEXT, objetoHistorial TEXT, objetoDetalle TEXT)' 
+            tx.executeSql(
+              'UPDATE clientes SET objetoHistorial = ? WHERE nombreCliente = ?',
+              [updatedObject, cliente],
+              (txObj, resultSet) => {
+                console.warn('********Nuevo objeto agregado al array correctamente', resultSet);
+                if (resultSet.rowsAffected > 0) {
+                  console.warn('********Nuevo objeto agregado al array correctamente');
+                }
+              },
+              (error) => {
+                console.error('Error al actualizar el objeto: ', error);
+              }
+            );
           }
+          
+        },
+        (error) => {
+          console.error('Error al obtener el objeto: ', error);
+        }
+      );
+    });
+  };
+
+  export const deleteHistorial = (cliente, newObjeto) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        'SELECT objetoHistorial FROM clientes WHERE nombreCliente = ?',
+        [cliente],
+        (txObj, resultSet) => {
+      
+          
+          if (resultSet.rows.length > 0) {
+            console.log("objeto traido de la db:",resultSet.rows.item(0).objetoHistorial)
+            let existingObject = JSON.parse(resultSet.rows.item(0).objetoHistorial);
+            
+            // Verificar si el objeto existente es un array vacío o no tiene un campo arrayField
+            if (!Array.isArray(existingObject.arrayField)) {
+              existingObject.arrayField = []; // Inicializar como array vacío si no es un array válido
+            }
+          
+            console.warn("****** addHistorial: objeto existente:", JSON.stringify(existingObject));
+            console.warn("****** addHistorial: nuevo objeto ", JSON.stringify(newObjeto));
+          
+            //existingObject.push(newObjeto[0]); // Agregar el nuevo objeto al arrayField
+            const nuevoArray = existingObject.filter(obj => {
+              // Aquí, define tu lógica para comparar los objetos
+              // Devuelve true para mantener el objeto en el nuevo array, y false para excluirlo
+              return (
+                obj.fecha !== objetoAEliminar.fecha &&
+                obj.horario !== objetoAEliminar.horario &&
+                obj.servicio !== objetoAEliminar.servicio 
+                
+              );
+            });
+          
+            const updatedObject = JSON.stringify(nuevoArray);
+            console.warn("****** addHistorial:  objeto resultante", updatedObject);
+          //' clientes ( nombreCliente TEXT, objetoDatos TEXT, objetoHistorial TEXT, objetoDetalle TEXT)' 
+            tx.executeSql(
+              'UPDATE clientes SET objetoHistorial = ? WHERE nombreCliente = ?',
+              [updatedObject, cliente],
+              (txObj, resultSet) => {
+                console.warn('********Nuevo objeto agregado al array correctamente', resultSet);
+                if (resultSet.rowsAffected > 0) {
+                  console.warn('********Nuevo objeto agregado al array correctamente');
+                }
+              },
+              (error) => {
+                console.error('Error al actualizar el objeto: ', error);
+              }
+            );
+          }
+          
         },
         (error) => {
           console.error('Error al obtener el objeto: ', error);
@@ -90,9 +159,9 @@ import { Alert } from 'react-native'; // Importamos FlatList y TextInput
               }
                 const fecha = extractMonthAndYear(mesandyear);
 
-          console.warn("cliente",cliente,"objeto a guardar:",{"fecha":fecha,"servicio":servicio,"descripcion":descripcion})
+          console.warn("cliente",cliente,"objeto a guardar:",[{"fecha":fecha,"horario":hora,"servicio":servicio,"descripcion":descripcion}])
           try {
-            addHistorial(cliente, { "fecha": fecha, "servicio": servicio, "descripcion": descripcion });
+            addHistorial(cliente, [{ "fecha": fecha,"horario":hora, "servicio": servicio, "descripcion": descripcion }]);
           } catch (error) {
             console.error("Hubo un error:", error);
           }
@@ -124,7 +193,7 @@ import { Alert } from 'react-native'; // Importamos FlatList y TextInput
     
   }
   
-  export const deleteTurno = (tabla, dia, hora, callback) => {
+  export const deleteTurno = (tabla, dia, hora, cliente,servicio,callback) => {
   // console.warn("tabla: ",tabla)
   // console.warn("dia: ",dia)
   // console.warn("hora: ",hora)
@@ -138,6 +207,29 @@ import { Alert } from 'react-native'; // Importamos FlatList y TextInput
           (txObj, resultSet) => {
             if (resultSet.rowsAffected > 0) {
               Alert.alert('Atención', 'Se eliminó el turno', [{ text: 'Ok', onPress: callback }]);
+            //COLOCAMOS UN CODIGO PARA ELIMINAR REGISTROS DEL HISTORIAL
+              //PREPARAMOS PARA OBTENER LA FECHA
+            function extractMonthAndYear(inputString) {
+              
+              const regex = /(\d{1,2})(\d{4})/;
+              const match = inputString.match(regex);
+                                  
+                      if (match) {
+                          const month = match[1];
+                          const year = match[2];
+                          return `${dia}/${month}/${year}`;
+                      } else {
+                          return 'sin especificar';
+                      }
+              }
+                const fecha = extractMonthAndYear(mesandyear);
+
+                //CONSULTAMOS LA COLUMNA DE HISTORIAL EN LA TABLA DE CLIENTES
+                //enviamos el objeto parcial para eliminar
+                deleteHistorial(cliente,{"fecha":fecha,"horario":hora,"servicio":servicio})
+
+
+
             } else {
               console.warn(JSON.stringify(resultSet))
               Alert.alert('Error', 'No se eliminó el turno', [{ text: 'Ok', onPress: callback }]);

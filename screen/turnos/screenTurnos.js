@@ -52,9 +52,13 @@ export default function ScreenTurnos() {
     setSelectDia(day)
 
     //creamos la tabla del mes actual si no existe
-    setMonthAndYear(`table${month}${year}`);
+    
+    initMes(`table${month}${year}`);
 
     console.log(`fecha actual: ${day}/${month}/${year}`);
+    
+    setMonthAndYear(`table${month}${year}`);
+    
   }, []);
 
   //función para ver el Modal con los turnos
@@ -136,14 +140,6 @@ export default function ScreenTurnos() {
 
     return <View style={styles.week}>{calendar}</View>;
   };
-
-  // const toggleImage = () => {
-  //   if (dirImg === bannerImage) {
-  //     setDirImg(iconImage);
-  //   } else {
-  //     setDirImg(bannerImage);
-  //   }
-  // };
 
   const nextMonth=()=>{
     if(selectMes>=12){
@@ -286,12 +282,13 @@ const styles = StyleSheet.create({
   },calendarioHead: {
     display: 'flex',
     flexDirection: 'column',
-    width: '100%',
+    //width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius:10,
     borderWidth:1,
-    backgroundColor:'black'
+    backgroundColor:'black',
+    margin:5
   },thisMes:{
     fontSize:30,
     color:'white'
@@ -311,7 +308,7 @@ const styles = StyleSheet.create({
   week: {
     display: 'flex',
     flexDirection: 'column',
-    paddingHorizontal: 5,
+    paddingHorizontal: 10,
     marginBottom: 10
   },
   diasSemana:{

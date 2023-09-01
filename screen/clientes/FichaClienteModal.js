@@ -293,29 +293,41 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
         setHayCambios(false)
       }
 
-      const RenderizarHistorial=()=>{
-        
-        let tamaño=objetoHistorial.length;
+  const RenderizarHistorial = () => {
+    let tamaño = objetoHistorial.length;
 
-            if(tamaño>0){
-                return(
-                    <View style={styles.row}>
-                        <Text style={styles.fecha}>{objetoHistorial[tamaño-1].fecha}</Text>
-                        <Text style={styles.tratamiento}>{objetoHistorial[tamaño-1].tratamiento}</Text>
-                        <Text style={styles.descripcion}>{objetoHistorial[tamaño-1].descripcion}</Text>
-                    </View>
-                    )
-            }else{
+    if (tamaño > 0) {
+        try {
+            const historialElements = []; 
 
-                return(
-                    <View style={{width:'100%'}}>
-                            <Text style={{textAlign:'center'}}>No hay historial previo</Text>
+            for (let index = tamaño - 1; index >= Math.max(tamaño - 3, 0); index--) {
+                historialElements.push(
+                    <View style={styles.row} key={index}>
+                        <Text style={styles.celdaHistorial}>{objetoHistorial[index].fecha}</Text>
+                        <Text style={styles.celdaHistorial}>{objetoHistorial[index].horario}</Text>
+                        <Text style={styles.celdaHistorial}>{objetoHistorial[index].servicio}</Text>
+                        <Text style={styles.celdaHistorial}>{objetoHistorial[index].descripcion}</Text>
                     </View>
-                )
-                    }
-         
-                }   
-        
+                );
+            }
+
+            return (
+                <View>
+                    {historialElements} 
+                </View>
+            );
+        } catch (error) {
+            console.error("Ocurrió un error en el historial:", error);
+        }
+    } else {
+        return (
+            <View style={{ width: '100%' }}>
+                <Text style={{ textAlign: 'center' }}>No hay historial previo</Text>
+            </View>
+        );
+    }
+};
+
       
 
   return (
@@ -352,22 +364,14 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
 
                         <View style={styles.rowTable}>
                             <Text style={[styles.widthTabla,styles.clave]}>Fecha</Text>
+                            <Text style={[styles.widthTabla,styles.clave]}>Horario</Text>
+                            <Text style={[styles.widthTabla,styles.clave]}>Servicio</Text>
                             <Text style={[styles.widthTabla,styles.clave]}>Descripción</Text>
-                            <Text style={[styles.widthTabla,styles.clave]}>Importe</Text>
-                            <Text style={[styles.widthTabla,styles.clave]}>Deuda</Text>
-                            <Text style={[styles.widthTabla,styles.clave]}>Total</Text>
+                            
                         </View>
 
-                        {objetoHistorial ? (<RenderizarHistorial />) : (
-                            <View style={[styles.rowTable,{width:'95%'}]}>
-                                <Text style={{width:'100%',textAlign:'center'}}>El cliente no tiene historial</Text>
-                            </View>
-                            )}
+                        <RenderizarHistorial />
 
-
-                    <View>
-                            <Text style={[styles.widthTabla,{position:'absolute',right:0}]}>total</Text>
-                        </View>
 
                     </TouchableOpacity>
 
@@ -404,7 +408,8 @@ enviarValores("Tratamientos","tratamientos",["Biotina cada 10 dias","Biotina cad
 
         <DatoClienteModal visible={ModalDatosClienteVisible} close={closeModalDC} name={nameCliente} id={idCliente} datosClientes={objetoDatos} setDatos={setOjetoDatos} cambios={setHayCambios} />
         <DesplegableModal visible={desplegableVisible} close={desplegableClose} title={titleDesplegable} valoresSeleccion={desplegableDatos} actualizar={ActualizarDatos} clave={clave} registrarCambios={setHayCambios}/>
-        <HistorialTurnoClienteModal visible={historialVisible} close={historialClose} datosHistorialCliente={objetoHistorial}/>
+        <HistorialTurnoClienteModal visible={historialVisible} close={historialClose} datosHistorialCliente={objetoHistorial} cliente={nameCliente}/>
+
     </Modal>
   );
 };
@@ -437,8 +442,13 @@ const styles = StyleSheet.create({
 
       },
       widthTabla:{
-        width:'20%'
+        width:'25%'
       },
+      celdaHistorial:{
+        width:'25%',
+        justifyContent:'center',
+        alignContent:'center'
+    },
       desingTabla:{
         margin:5,
         borderWidth:1,
@@ -458,20 +468,11 @@ const styles = StyleSheet.create({
 
         fontWeight:700
       },
-      valor:{
 
-      },
-      fecha:{
-        width:'20%',
-        justifyContent:'center'
-    },
-    tratamiento:{
-        width:'20%',
-        justifyContent:'center'
-    },
-    descripcion:{
-        width:'20%',
-        justifyContent:'center'
+    celdaHistorial:{
+        width:'25%',
+        justifyContent:'center',
+        alignContent:'center'
     },
 
 

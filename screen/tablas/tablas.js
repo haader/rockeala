@@ -2,6 +2,7 @@ import React, { useEffect,useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
 
 import * as SQLite from 'expo-sqlite';
+import { addTurnos } from '../../database/databaseTurnos';
 
 const db = SQLite.openDatabase('dataBasePeluqueria.db');
 
@@ -64,7 +65,7 @@ const traerNombreTablas=()=>{
     <View>
       <Text>Ver la consola para los nombres de las tablas</Text>
           <Text>Insertar SQL:</Text>        
-          <TextInput styles={{width:'100%',padding:10,margin:10}} placeholder='ingrese consulta' value={input} onChangeText={(text)=>{changeText(text)}}></TextInput>
+          <TextInput styles={{width:'90%',padding:10,margin:10,borderRadius:10,borderWidth:1}} placeholder='ingrese consulta' value={input} onChangeText={(text)=>{changeText(text)}}></TextInput>
           <Button title='consultar' onPress={()=>{consultar()}}></Button>
         
         <ScrollView>
@@ -83,6 +84,52 @@ const traerNombreTablas=()=>{
         </View>
 
         <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`
+            SELECT objetoHistorial FROM clientes WHERE nombreCliente = 'Ambar'
+            `)}}>
+                  <Text>Traer Clientes</Text>
+            </TouchableOpacity>
+        </View>
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>addTurnos('table82023', '30', '15', 'Ambar','uñas','prueba',()=>{console.log("call1")},()=>{console.log("call2")})}>
+                  <Text>add turnos</Text>
+            </TouchableOpacity>
+        </View>
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`SELECT dia,hora,servicio,descripcion FROM table82023 WHERE cliente = 'Ambar'`)}}>
+                  <Text>traer cliente</Text>
+            </TouchableOpacity>
+        </View>
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`SELECT nombreCliente,objetoHistorial FROM clientes WHERE nombreCliente = 'Ambar'`)}}>
+                  <Text>traer objetoHistorial</Text>
+            </TouchableOpacity>
+        </View>
+
+        
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`UPDATE clientes SET objetoHistorial = '[{"nombre":"ad"},{"nombre":"prueba"}]' WHERE nombreCliente = 'Ambar'`)}}>
+                  <Text>update clientes/historial</Text>
+            </TouchableOpacity>
+        </View>
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`DELETE FROM clientes`)}}>
+                  <Text>DELETE FROM clientes</Text>
+            </TouchableOpacity>
+        </View>
+
+        <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
+            <TouchableOpacity onPress={()=>{setInput(`DELETE FROM table82023`)}}>
+                  <Text>DELETE FROM table82023</Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* <View style={{borderWidth:1,borderRadius:10,margin:10,padding:10}}>
             <TouchableOpacity onPress={()=>{setInput(`CREATE TABLE table112023 (
                                                           id INTEGER PRIMARY KEY,
                                                           dia TEXT,
@@ -148,7 +195,7 @@ const traerNombreTablas=()=>{
             <TouchableOpacity onPress={()=>{setInput(`DELETE FROM table2023;`)}}>
                   <Text>DELETE FROM table2023;</Text>
             </TouchableOpacity>
-        </View>
+        </View> */}
 
           </View>
         </ScrollView>

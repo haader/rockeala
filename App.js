@@ -74,7 +74,7 @@ export default function App() {
         })}
         >
           {/* <Tab.Screen name="Tablas" component={Tablas} /> */}
-          <Tab.Screen name="Load" component={LoadingScreen} />
+          {/* <Tab.Screen name="Load" component={LoadingScreen} /> */}
 
           <Tab.Screen name="Turnos" component={ScreenTurnos} />
           <Tab.Screen name="Clientes" component={ScreenClientes} />

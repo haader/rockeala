@@ -135,8 +135,12 @@ const agregarTurno=(time)=>{
     setVisibleModalAddTurno(true)
  
 }
-const eliminarTurno=(tabla,dia,hora)=>{
-    Alert.alert('Atención','¿Desea eliminar el turno Seleccionado?',[{text:'Si',onPress:()=>{deleteTurno(tabla,dia,hora,()=>{cargarTurnos()})}},{text:'No',onPress:()=>{}}])
+const eliminarTurno=(tabla,dia,hora,cliente,servicio)=>{
+    Alert.alert('Atención','¿Desea eliminar el turno Seleccionado?',[{text:'Si',onPress:()=>{
+    
+        deleteTurno(tabla,dia,hora,cliente,servicio,()=>{cargarTurnos()})
+    
+    }},{text:'No',onPress:()=>{}}])
 }
 const editarTurno=(time)=>{
     console.log("-Editar time: "+time)
@@ -145,7 +149,7 @@ const editarTurno=(time)=>{
 }
 
 
-const BtnAcciones=({time})=>{
+const BtnAcciones=({time,cliente,servicio})=>{
     return(
         <View style={styles.btn}>
                 {/* editar */}
@@ -153,7 +157,11 @@ const BtnAcciones=({time})=>{
                     <AntDesign name="edit" size={24} color="chocolate" />
                 </TouchableOpacity>
                 {/* eliminar */}
-                <TouchableOpacity style={{marginLeft:10}} onPress={()=>eliminarTurno(`table${month}${year}`,numberDay,time)}>
+                <TouchableOpacity style={{marginLeft:10}} onPress={()=>{
+    
+    eliminarTurno(`table${month}${year}`,numberDay,time,cliente,servicio)
+
+                    }}>
                         <AntDesign name="closecircle" size={24} color="red" />
                 </TouchableOpacity>
         </View>
@@ -203,7 +211,7 @@ const Horarios=()=>{
                 {cronograma[hora-8].descripcion==("")?null:<Text style={{fontSize:8}}><Text style={{fontWeight:'bold',fontSize:10}}>-Detalle:</Text> {cronograma[hora-8].descripcion}</Text>}
                 
             </View>
-            {cronograma[hora - 8].cliente!='Horario Disponible' ? <BtnAcciones time={cronograma[hora - 8].hora} /> : <BtnAgregar addTurno={addTurno} time={cronograma[hora - 8].hora}/>}
+            {cronograma[hora - 8].cliente!='Horario Disponible' ? <BtnAcciones time={cronograma[hora - 8].hora} cliente={cronograma[hora - 8].cliente} servicio={cronograma[hora - 8].servicio} /> : <BtnAgregar addTurno={addTurno} time={cronograma[hora - 8].hora}/>}
         </View>
 
         )
@@ -237,21 +245,21 @@ const closeModalEdite=()=>{
             {loading && (<LoadingScreen/>)}
 
             <View style={styles.title}>
-            <TouchableOpacity onPress={()=>anterior()}>
-                <MaterialIcons name="navigate-before" size={50} color="black" />
-            </TouchableOpacity>
-                <Text>{nameDay(numberDay,month,year)}</Text>
-                <Text>{numberDay}/</Text>
-                <Text>{month}</Text>
-            <TouchableOpacity onPress={()=>siguiente()}>
-                <MaterialIcons name="navigate-next" size={50} color="black" />
-            </TouchableOpacity>
-        
+                    <TouchableOpacity onPress={()=>anterior()}>
+                        <MaterialIcons name="navigate-before" size={50} color="black" />
+                    </TouchableOpacity>
+                        <Text>{nameDay(numberDay,month,year)}</Text>
+                        <Text>{numberDay}/</Text>
+                        <Text>{month}</Text>
+                    <TouchableOpacity onPress={()=>siguiente()}>
+                        <MaterialIcons name="navigate-next" size={50} color="black" />
+                    </TouchableOpacity>
+                
             </View>
-            <View style={[styles.row,{marginTop:10,marginBottom:10}]}>
-                <Text style={{width:'20%',textAlign:'center'}}>Horarios</Text>
-                <Text style={{width:'60%',textAlign:'center'}}>Clientes</Text>
-                <Text style={{width:'20%',textAlign:'center'}}>Acciones</Text>
+            <View style={[styles.row,{marginTop:10,marginBottom:10,borderRadius:10,borderWidth:1,backgroundColor:'black',padding:5,margin:5}]}>
+                <Text style={{width:'20%',textAlign:'center',color:'white'}}>Horarios</Text>
+                <Text style={{width:'60%',textAlign:'center',color:'white'}}>Clientes</Text>
+                <Text style={{width:'20%',textAlign:'center',color:'white'}}>Acciones</Text>
             </View>
 
             <ScrollView >
@@ -282,7 +290,8 @@ const styles=StyleSheet.create(
         borderWidth:1,
         borderRadius:10,
         height:50,
-        alignItems:'center'
+        alignItems:'center',
+        margin:5
     },
     row:{
     display:'flex',

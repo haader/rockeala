@@ -3,21 +3,24 @@ import {View,Modal,Text,TouchableOpacity,StyleSheet, TextInput,Alert} from 'reac
 import { AntDesign } from '@expo/vector-icons';
 
 
-export default  HistorialTurnoClienteModal=({visible,close,datosHistorialCliente})=>{
+export default  HistorialTurnoClienteModal=({visible,close,datosHistorialCliente, cliente})=>{
 
  const ListHistorial=()=>{
-
+          
             return(
-                datosHistorialCliente.map((element)=>{
-                  let index=0;  
+              
+                datosHistorialCliente.map((element,index)=>{
+                  
                   return(
-                        <View key={index++} style={styles.row}>
+                        <View key={'texto'+index} style={[styles.row,{borderRadius:10,borderWidth:1,margin:5}]}>
                           
-                            <Text style={styles.fecha}>{element.fecha}</Text>
-                            <Text style={styles.tratamiento}>{element.tratamiento}</Text>
-                            <Text style={styles.descripcion}>{element.descripcion}</Text>
+                            <Text style={styles.celdaHistorial}>{element.fecha}</Text>
+                            <Text style={styles.celdaHistorial}>{element.horario}</Text>
+                            <Text style={styles.celdaHistorial}>{element.servicio}</Text>
+                            <Text style={styles.celdaHistorial}>{element.descripcion}</Text>
                         </View>
                     )
+                 
                     
                     }
                 )   
@@ -31,16 +34,20 @@ export default  HistorialTurnoClienteModal=({visible,close,datosHistorialCliente
     <Modal visible={visible} onRequestClose={close}>
         
         <View style={styles.header}>
-                <Text>Historial de turnos de {datosHistorialCliente.cliente}</Text>
+                <Text>Historial de: {cliente}</Text>
         </View>
 
         <View style={styles.body}>
 
-                <View style={styles.row}>
+                <View style={[styles.row,{borderRadius:10,borderWidth:1,margin:5,backgroundColor:'black'}]}>
                     
-                    <Text>Fecha</Text>
-                    <Text>Tratamiento</Text>
-                    <Text>Descripción</Text>
+        
+                    <Text style={[styles.widthTabla]}>Fecha</Text>
+                    <Text style={[styles.widthTabla]}>Horario</Text>
+                    <Text style={[styles.widthTabla]}>Servicio</Text>
+                    <Text style={[styles.widthTabla]}>Descripción</Text>
+                            
+                        
 
                 </View>
 
@@ -53,7 +60,7 @@ export default  HistorialTurnoClienteModal=({visible,close,datosHistorialCliente
 
                 <TouchableOpacity style={styles.btn} onPress={
                         ()=>{
-                          cerrar();
+                          close()
                         }
                     }>
                         <AntDesign name="closecircleo" size={24} color="black" />
@@ -86,22 +93,21 @@ const styles=StyleSheet.create(
             margin:10,
             alignItems:'center',
             justifyContent:'center',
-            borderRadius:10,
-            borderWidth:1
+            
           },
 
-          fecha:{
-                width:'20%',
-                justifyContent:'center'
-            },
-            tratamiento:{
-                width:'20%',
-                justifyContent:'center'
-            },
-            descripcion:{
-                width:'20%',
-                justifyContent:'center'
-            },
+          widthTabla:{
+            width:'25%',
+            fontWeight:'bold',
+            textAlign:'center',
+            color:'white'
+          },
+          celdaHistorial:{
+            width:'25%',
+            justifyContent:'center',
+            textAlign:'center',
+            alignContent:'center'
+        },
 
           row:{
             display:'flex',

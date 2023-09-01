@@ -15,9 +15,7 @@ export const addClientes=(nombreCliente,callback)=>{
   "estilista":"Natalia Soledad Romero"
   };
   const objetoHistorial=
-    [{
-    
-  }]
+    []
   ;
   const objetoDetalle={
     "longitud":"No informado",

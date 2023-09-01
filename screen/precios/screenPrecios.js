@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AntDesign } from '@expo/vector-icons';
-import { ScrollView, StyleSheet, Text, View ,TouchableOpacity,Alert} from 'react-native';
+import { ScrollView, StyleSheet, Text, View ,TouchableOpacity,Linking} from 'react-native';
 import AgregarPreciosModal from './agregarPreciosModal'
-import EditPreciosModal from "./editPreciosModal";
-import {fetchPrecios,deletePrecios} from "../../database/precios/databasePrecios";
+import {fetchPrecios} from "../../database/precios/databasePrecios";
+import VerPreciosModal from "./verPreciosModal";
+
 
 
 export default function ScreenPrecios() {
@@ -40,24 +41,10 @@ useEffect(()=>{
   const closeAdd=()=>{
     setVisibleAdd(false)
   }
+  
   const closeEdit=()=>{
     setVisibleEdit(false)
   }
- 
-  const [showButtons, setShowButtons] = useState(Array(datosPrecios.length).fill(false));
-
-  const hideButtons = () => {
-    setShowButtons(Array(datosPrecios.length).fill(false));
-    
-  };
-
-  const handleTouchStart = (index) => {
-    const newShowButtons = [...showButtons];
-    newShowButtons.fill(false);
-    newShowButtons[index] = true;
-    setShowButtons(newShowButtons);
-    
-  };
 
   const ListarPrecios = () => {
     return datosPrecios.map((element, index) => (
@@ -66,80 +53,20 @@ useEffect(()=>{
           
             <View
               style={[styles.row, styles.border]}
-              onTouchStart={() => handleTouchStart(index)}
+              onTouchStart={() => {
+                
+                editPrecios(element.id,element.servicio,element.precio); 
+                setReSelect(!reSelect)
+                
+              }}
             >
               <Text style={{ width: '50%',textAlign:'center' }}>{element.servicio}</Text>
               <Text style={{ width: '50%',textAlign:'center' }}>{element.precio} $</Text>
+              
             </View>
           
     
-          {showButtons[index] && (
-            <View style={{ 
-              flexDirection: 'row',
-              position: 'absolute', 
-              right: 0,
-              backgroundColor: 'white',
-              alignItems: 'center',
-              justifyContent: 'space-around',
-              height: 30,
-              width: '40%',
-              borderRadius: 10,
-              margin: 5,
-              borderWidth: 1
-            }}>
-              {/* Aquí colocas tus botones */}
-              <TouchableOpacity
-                style={{height: '100%', width: '50%', justifyContent: 'center', alignItems: 'center'}}
-                onPress={() => {
-                  editPrecios(element.id,element.servicio,element.precio); 
-                  setReSelect(!reSelect)}}
-              >
-                <AntDesign name="edit" size={24} color="orange" />
-              </TouchableOpacity>
-    
-              <TouchableOpacity
-                style={{height: '100%', width: '50%', justifyContent: 'center', alignItems: 'center'}}
-                onPress={() => {
-
-
-                Alert.alert(
-                  'Atención',
-                  '¿Desea eliminar estos datos?',
-                  [
-                    {
-                      text: 'Si',
-                      onPress: () => {
-
-                        //funcion para eliminar 
-                        deletePrecios(element.id);
-
-                        let newObjet=datosPrecios.filter((datosPrecios)=>{
-                          return datosPrecios.id!=element.id;
-                          
-                          })
-                        setDatosPrecios(
-                          newObjet
-                        )
-
-                      },
-                      style: 'default',
-                    },{
-                      text: 'No',
-                      onPress: () => {
-                          
-                      },
-                      style: 'default',
-                    }
-                  ]
-                );
-
-                  
-                }}
-              >
-                <AntDesign name="delete" size={24} color="red" />
-              </TouchableOpacity>
-            </View>
-          )}
+         
         </View>
         
       
@@ -157,18 +84,34 @@ useEffect(()=>{
   };
 
   
-  
-  
+  const shareToWhatsApp = () => {
+    
+    let listaPrecios=datosPrecios.map((obj=>{
+      return(
+        `- *${obj.servicio}* : ${obj.precio}$ \n`
+      )
+    }))
+     //= "Precio 1: $10\nPrecio 2: $20\nPrecio 3: $30"; 
+    const message = `Hola como estas?\n Te paso la lista de precios:\n${listaPrecios} No dudes en consultarme! `;
+    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
+
+    Linking.canOpenURL(url)
+      .then(supported => {
+        if (!supported) {
+          console.error("WhatsApp no está instalado en el dispositivo.");
+        } else {
+          return Linking.openURL(url);
+        }
+      })
+      .catch(error => console.error("Error al abrir WhatsApp:", error));
+  };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 
       <AgregarPreciosModal visible={visibleAdd} close={closeAdd} actualizar={traerDatos}/>
-      <EditPreciosModal visible={visibleEdit} close={closeEdit} servicio={valueServicio} precio={valuePrecio} id={valueId} setDatos={setDatosPrecios} datos={datosPrecios} reSelect={reSelect}/>
+      <VerPreciosModal visible={visibleEdit} close={closeEdit} servicio={valueServicio} precio={valuePrecio} id={valueId} setDatos={setDatosPrecios} datos={datosPrecios} reSelect={reSelect}/>
       
-
-
-
 
       <View style={styles.header}>
         <Text>Precios de la Peluqueria</Text>
@@ -179,30 +122,38 @@ useEffect(()=>{
         <Text style={styles.columnTable}>Precio</Text>
       </View>
 
-      <ScrollView >
+     
+      
+    
+  <ScrollView>
+    
+      {/* Contenido del ScrollView aquí */}
+      <ListarPrecios />
+    
+  </ScrollView>
 
-        <ListarPrecios/>
-        
-      </ScrollView>
 
-      <TouchableOpacity style={{
-        
-        width:'100%',
-        height:'100%',
-        position:'absolute',
-        zIndex:-1
-      }}
-      onPress={()=>{
-        hideButtons()
-      }}
-      />
+      
+    
+
+
 
 
       <TouchableOpacity style={{alignItems:'center',margin:20}} onPress={() => {
         setVisibleAdd(true)
       }}>
-        <AntDesign name="pluscircleo" size={50} color="black" />
+          <AntDesign name="pluscircleo" size={50} color="black" />
       </TouchableOpacity>
+
+      
+      <TouchableOpacity style={{alignItems:'center',margin:20}} onPress={() => {
+        shareToWhatsApp()
+      }}>
+          <AntDesign name="sharealt" size={24} color="black" />
+      </TouchableOpacity>
+
+
+
     </View>
   );
 }
