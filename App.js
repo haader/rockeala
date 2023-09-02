@@ -12,7 +12,7 @@ import ScreenPrecios from './screen/precios/screenPrecios';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ScreenStock from './screen/stock/screenStock';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {initTablaPrecios, initTablaStock, initTablaClientes, initTablaGastos} from './database/init/initDatabase'
+import {initTablaPrecios, initTablaStock, initTablaClientes, initTablaGastos, initTablaCompartir} from './database/init/initDatabase'
 import LoadingScreen from './componentes/LoadingScreen';
 import Tablas from './screen/tablas/tablas';
 const Tab = createBottomTabNavigator();
@@ -25,6 +25,7 @@ export default function App() {
       initTablaStock();
       initTablaClientes();
       initTablaGastos();
+      initTablaCompartir()
 
 
   return (

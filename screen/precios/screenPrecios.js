@@ -4,12 +4,17 @@ import { ScrollView, StyleSheet, Text, View ,TouchableOpacity,Linking} from 'rea
 import AgregarPreciosModal from './agregarPreciosModal'
 import {fetchPrecios} from "../../database/precios/databasePrecios";
 import VerPreciosModal from "./verPreciosModal";
+import EditeTextoModal from "./editeTextoModal";
 
 
 
 export default function ScreenPrecios() {
 
 const[datosPrecios,setDatosPrecios]=useState([])
+
+
+
+
  
 const traerDatos=()=>{
     
@@ -30,6 +35,8 @@ useEffect(()=>{
   const[visibleAdd,setVisibleAdd]=useState(false);
   const[visibleEdit,setVisibleEdit]=useState(false);
   const[reSelect,setReSelect]=useState(false);
+  const[visibleTexto,setVisibleTexto]=useState(false);
+
   
 
   //MODALES EDITAR VALORES
@@ -44,6 +51,10 @@ useEffect(()=>{
   
   const closeEdit=()=>{
     setVisibleEdit(false)
+  }
+
+  const closeTexto=()=>{
+    setVisibleTexto(false)
   }
 
   const ListarPrecios = () => {
@@ -106,12 +117,16 @@ useEffect(()=>{
       .catch(error => console.error("Error al abrir WhatsApp:", error));
   };
 
+  const editText=()=>{
+    setVisibleTexto(true)
+  }
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 
       <AgregarPreciosModal visible={visibleAdd} close={closeAdd} actualizar={traerDatos}/>
       <VerPreciosModal visible={visibleEdit} close={closeEdit} servicio={valueServicio} precio={valuePrecio} id={valueId} setDatos={setDatosPrecios} datos={datosPrecios} reSelect={reSelect}/>
-      
+      <EditeTextoModal  visible={visibleTexto} close={closeTexto} datos={datosPrecios} />
 
       <View style={styles.header}>
         <Text>Precios de la Peluqueria</Text>
@@ -146,12 +161,21 @@ useEffect(()=>{
       </TouchableOpacity>
 
       
+<View style={{display:'flex',flexDirection:'row'}}>
+    
+    <TouchableOpacity style={{alignItems:'center',margin:20}} onPress={() => {
+        editText()
+      }}>
+          <AntDesign name="edit" size={24} color="black" />
+      </TouchableOpacity>
+
       <TouchableOpacity style={{alignItems:'center',margin:20}} onPress={() => {
         shareToWhatsApp()
       }}>
           <AntDesign name="sharealt" size={24} color="black" />
       </TouchableOpacity>
 
+</View>
 
 
     </View>

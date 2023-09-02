@@ -4,6 +4,28 @@ import * as SQLite from 'expo-sqlite';
 const database = SQLite.openDatabase('dataBasePeluqueria.db');
 
 
+export const fetchCompartir = (callback) => {
+  database.transaction((tx) => {
+    tx.executeSql('SELECT * FROM compartir', [], (_, { rows }) => {
+      callback(rows._array);
+    });
+  });
+};
+
+export const updateCompartir=(texto1,texto2,callback)=>{
+  database.transaction(tx=>{
+    tx.executeSql(
+      'UPDATE from compartir SET textoInicial = ?, textoFinal = ? where id = 0',[texto1,texto2],
+      (obj,resultSet)=>{
+        if(resultSet.rowsAffected>0){
+          callback
+        }
+      },error=>{console.error(error)}
+    )
+    } 
+  )
+}
+
 //funciones para la tabla PRECIOS (add,delete,update,fetch)
 export const addPrecios=(servicio,precio)=>{
     database.transaction((tx)=>{
