@@ -1,34 +1,22 @@
 import React,{useState,useEffect} from 'react';
-import {View,Modal,Text,TouchableOpacity,StyleSheet, TextInput,Alert} from 'react-native';
+import {View,Modal,Text,TouchableOpacity,StyleSheet, TextInput,Alert, ScrollView} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import {updatePrecios,deletePrecios, updateCompartir, fetchCompartir} from "../../database/precios/databasePrecios";
+import {updateCompartir, fetchCompartir} from "../../database/precios/databasePrecios";
 
 
-export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
+export default  EditeTextoModal=({visible,close,datos, txtInicial, txtFinal,reSelect})=>{
+  
+  const[textoInicial,setTextoInicial]=useState(txtInicial)
+  const[textoFinal,setTextoFinal]=useState(txtFinal)
+    
+useEffect(()=>{
+  
+  setTextoInicial(txtInicial);
+  setTextoFinal(txtFinal);
+  
+},[txtInicial,txtFinal])
+  
 
-    const[textoInicialDb,setTextoInicialDb]=useState();
-    const[textoFinalDb,setTextoFinalDb]=useState();
-
-    const[textoInicial,setTextoInicial]=useState(`
-    ✂️Peluqueria Rockeala💇
-    Lista de Precios:
-    `)
-    const[textoFinal,setTextoFinal]=useState(`
-    Cualquier duda consultame!
-    `)
-
-    useEffect(() => {
-        //traemos los datos de la base de datos
-        // fetchCompartir(
-        //                             (dato)=>{
-        //                                 setTextoInicialDb(dato.textoInicial);
-        //                                 setTextoFinalDb(dato.textoFinal);
-
-        //                                 setTextoInicial(dato.textoInicial);
-        //                                 setTextoFinal(dato.textoFinal);
-        //                             }
-        //                         )
-      }, []);
     
 
     const InputChange0 = (text) => {
@@ -42,23 +30,16 @@ export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
     };
 
     const actualizarDatos=()=>{
-      if((textoInicial!=null&&textoInicial!=textoInicialDb)||(textoFinal!=null&&textoFinal!=textoFinalDb)){
+      if((textoInicial!=null&&textoInicial!=txtInicial)||(textoFinal!=null&&textoFinal!=txtFinal)){
 
         Alert.alert(
           'Atención',
-          '¿Desea Editar estos datos estos datos?',
+          '¿Desea Editar estos datos ?',
           [{
               text:'SI',
               onPress:()=>{
                         updateCompartir(textoInicial,textoFinal,
-                            ()=>{
-                                fetchCompartir(
-                                    (dato)=>{
-                                        setTextoInicialDb(dato.textoInicial);
-                                        setTextoFinalDb(dato.textoFinal);
-                                    }
-                                )
-                            }
+                          
                             )
                         close();
                 
@@ -76,7 +57,7 @@ export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
 
 
         
-    }else if(textoInicial==textoInicialDb&&textoFinal==textoFinalDb){
+    }else if(textoInicial==txtInicial&&textoFinal==txtFinal){
         Alert.alert(
             'Atención',
             'NO se editaron los valores',
@@ -106,15 +87,14 @@ export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
 
     const ListaPrecios=()=>{
 
-        datos.map((obj)=>{
+        return datos.map((obj, index)=>{
             return(
-                <View style={{display:'flex',flexDirection:'row'}}>
+                <View key={index} style={{display:'flex',flexDirection:'row'}}>
                     <Text style={{fontWeight:'bold'}}>-{obj.servicio}</Text>
                     <Text>{obj.precio} $</Text>
                 </View>
             )
-        }
-            
+          }
         )
     }
     
@@ -139,14 +119,16 @@ export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
 
     {/* REINCIAR DATOS INICIAL */}
     <TouchableOpacity style={{position:'absolute',right:10}} onPress={()=>{
-        setTextoInicial(textoInicialDb)
+        setTextoInicial(txtInicial)
     }}>
         <AntDesign name="closecircleo" size={24} color="black" />
     </TouchableOpacity>
 </View>
 
+<ScrollView>
+  <ListaPrecios/>
+</ScrollView>
 
-<ListaPrecios/>
 
 
 <View style={styles.input}>
@@ -160,7 +142,7 @@ export default  EditeTextoModal=({visible,close,datos, reSelect})=>{
     />
     {/* REINCIAR DATOS FINAL */}
     <TouchableOpacity style={{position:'absolute',right:10}} onPress={()=>{
-        setTextoFinal(textoFinalDb)
+        setTextoFinal(txtFinal)
     }}>
         <AntDesign name="closecircleo" size={24} color="black" />
     </TouchableOpacity>

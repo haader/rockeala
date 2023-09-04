@@ -3,6 +3,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View ,TouchableOpacity,Linking} from 'react-native';
 import AgregarPreciosModal from './agregarPreciosModal'
 import {fetchPrecios} from "../../database/precios/databasePrecios";
+import {updateCompartir, fetchCompartir} from "../../database/precios/databasePrecios";
 import VerPreciosModal from "./verPreciosModal";
 import EditeTextoModal from "./editeTextoModal";
 
@@ -11,7 +12,8 @@ import EditeTextoModal from "./editeTextoModal";
 export default function ScreenPrecios() {
 
 const[datosPrecios,setDatosPrecios]=useState([])
-
+const[textoInicialDb,setTextoInicialDb]=useState('');
+    const[textoFinalDb,setTextoFinalDb]=useState('');
 
 
 
@@ -23,6 +25,22 @@ const traerDatos=()=>{
     })
 
 }
+
+useEffect(() => {
+        
+  //traemos los datos de la base de datos
+    fetchCompartir(
+    
+      (dato)=>{
+        console.log("fetchCompartir: ",dato)
+            setTextoInicialDb(dato[0].textoInicial);
+            setTextoFinalDb(dato[0].textoFinal);
+                                }
+
+                            )
+
+
+  }, [visibleTexto]);
 
 useEffect(()=>{
   
@@ -103,7 +121,7 @@ useEffect(()=>{
       )
     }))
      //= "Precio 1: $10\nPrecio 2: $20\nPrecio 3: $30"; 
-    const message = `Hola como estas?\n Te paso la lista de precios:\n${listaPrecios} No dudes en consultarme! `;
+    const message = `${textoInicialDb}\n${listaPrecios}\n ${textoFinalDb} `;
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
 
     Linking.canOpenURL(url)
@@ -126,7 +144,7 @@ useEffect(()=>{
 
       <AgregarPreciosModal visible={visibleAdd} close={closeAdd} actualizar={traerDatos}/>
       <VerPreciosModal visible={visibleEdit} close={closeEdit} servicio={valueServicio} precio={valuePrecio} id={valueId} setDatos={setDatosPrecios} datos={datosPrecios} reSelect={reSelect}/>
-      <EditeTextoModal  visible={visibleTexto} close={closeTexto} datos={datosPrecios} />
+      <EditeTextoModal  visible={visibleTexto} close={closeTexto} datos={datosPrecios} txtFinal={textoFinalDb} txtInicial={textoInicialDb}/>
 
       <View style={styles.header}>
         <Text>Precios de la Peluqueria</Text>

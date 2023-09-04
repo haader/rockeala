@@ -74,7 +74,7 @@ export default function App() {
           tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
         })}
         >
-          {/* <Tab.Screen name="Tablas" component={Tablas} /> */}
+          <Tab.Screen name="Tablas" component={Tablas} />
           {/* <Tab.Screen name="Load" component={LoadingScreen} /> */}
 
           <Tab.Screen name="Turnos" component={ScreenTurnos} />
